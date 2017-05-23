@@ -69,6 +69,14 @@
         <activity
             android:name=".Main.Events.Events"
             android:label="@string/title_activity_events"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Main.Events.EventDetails"
+            android:label="@string/title_activity_event_details"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Main.Revision.Revision"
+            android:label="@string/title_activity_revision"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

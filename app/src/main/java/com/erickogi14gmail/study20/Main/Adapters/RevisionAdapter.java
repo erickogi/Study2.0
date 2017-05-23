@@ -9,55 +9,60 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
-import com.erickogi14gmail.study20.Main.models.Assignment_content_model;
 import com.erickogi14gmail.study20.Main.models.Course_model;
+import com.erickogi14gmail.study20.Main.models.Revision_model;
 import com.erickogi14gmail.study20.R;
 
 import java.util.ArrayList;
 
 /**
- * Created by kimani kogi on 5/18/2017.
+ * Created by kimani kogi on 5/22/2017.
  */
 
-public class AssignmentDownloadAdapter extends RecyclerView.Adapter<AssignmentDownloadAdapter.MyViewHolder> {
+public class RevisionAdapter extends RecyclerView.Adapter<RevisionAdapter.MyViewHolder> {
 
     Context context;
-    private ArrayList<Assignment_content_model> modelList;
+    int a;
+    private ArrayList<Revision_model> modelList;
 
-    public AssignmentDownloadAdapter(Context context, ArrayList<Assignment_content_model> modelList) {
+    public RevisionAdapter(Context context, ArrayList<Revision_model> modelList, int a) {
         this.context = context;
         this.modelList = modelList;
+        this.a = a;
     }
 
 
     @Override
-    public AssignmentDownloadAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RevisionAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.assignment_list_download, parent, false);
+                .inflate(R.layout.revision_list_item, parent, false);
 
         return new MyViewHolder(itemView);
     }
 
     @Override
-    public void onBindViewHolder(AssignmentDownloadAdapter.MyViewHolder holder, int position) {
-        Assignment_content_model model = modelList.get(position);
-        holder.textView_list_item_title.setText(model.getASSIGNMENT_NAME());
-        holder.textView_list_item_name.setText(model.getASSIGNMENT_CODE() + "  " + model.getASSIGNMENT_COURSE_NAME());
-        holder.textView_list_item_date.setText(model.getASSIGNMENT_DONE_ON());
-        holder.textView_list_item_by.setText(model.getASSIGNMENT_DONE_BY());
+    public void onBindViewHolder(RevisionAdapter.MyViewHolder holder, int position) {
+        Revision_model model = modelList.get(position);
+        holder.textView_list_item_title.setText(model.getRevision_course_name());
+        holder.textView_list_item_name.setText(model.getRevision_course_code());
+        holder.textView_list_item_date.setText(model.getRevision_date());
+        holder.textView_list_item_by.setText("By : " + model.getRevision_uploaded_by());
 
-
-        DBOperations dbOperations = new DBOperations(context);
-        if (dbOperations.getAssignmentById(String.valueOf(model.getASSIGNMENT_ID()))) {
-            holder.state.setImageResource(R.drawable.ic_check_circle_black_24dp);
+        if (a == 0) {
+            DBOperations dbOperations = new DBOperations(context);
+            if (dbOperations.getRevisionById(String.valueOf(model.getId()))) {
+                holder.state.setImageResource(R.drawable.ic_check_circle_black_24dp);
+            } else {
+                holder.state.setImageResource(R.drawable.ic_get_app_black_24dp);
+            }
         } else {
-            holder.state.setImageResource(R.drawable.ic_get_app_black_24dp);
+            holder.state.setVisibility(View.INVISIBLE);
         }
 
 
     }
 
-    public void updateList(ArrayList<Assignment_content_model> list) {
+    public void updateList(ArrayList<Revision_model> list) {
         modelList = list;
         notifyDataSetChanged();
     }
@@ -90,4 +95,5 @@ public class AssignmentDownloadAdapter extends RecyclerView.Adapter<AssignmentDo
 
         }
     }
+
 }

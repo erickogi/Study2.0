@@ -116,4 +116,6 @@
     <string name="title_activity_news">News</string>
     <string name="title_activity_assignments">Assignments</string>
     <string name="title_activity_events">Events</string>
+    <string name="title_activity_event_details">EventDetails</string>
+    <string name="title_activity_revision">Revision</string>
 </resources>

@@ -48,9 +48,9 @@ public class fragment_download_assignment extends Fragment {
     static Context context;
     static RecyclerView.LayoutManager mLayoutManager;
     static ArrayList<Assignment_content_model> assignment_model;
+    static AssignmentDownloadAdapter adapter;
     MainRecyclerViewAdapter mainRecyclerViewAdapter;
     ArrayList<Course_model> displayedList;
-    AssignmentDownloadAdapter adapter;
     DBOperations dbOperations;
     SwipeRefreshLayout swipe_refresh_layout;
     RecyclerView recyclerView_vertical;
@@ -60,6 +60,24 @@ public class fragment_download_assignment extends Fragment {
     private Handler progressBarHandler = new Handler();
 
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
+
+    static void filter(String text) {
+        ArrayList<Assignment_content_model> temp = new ArrayList();
+        for (Assignment_content_model d : assignment_model) {
+            //or use .contains(text)
+            if (d.getASSIGNMENT_CODE().toLowerCase().contains(text.toLowerCase())
+                    || d.getASSIGNMENT_COURSE_NAME().toLowerCase().contains(text.toLowerCase())) {
+                temp.add(d);
+            }
+
+        }
+        try {
+            adapter.updateList(temp);
+        } catch (Exception nm) {
+            nm.printStackTrace();
+        }
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -231,24 +249,6 @@ public class fragment_download_assignment extends Fragment {
         requestDataSources(api.ASSIGNMENTS_END_POINT);
     }
 
-//    void filter(String text) {
-//        ArrayList<Assignment_content_model> temp = new ArrayList();
-//        for (Assignment_content_model d : assignment_model) {
-//            //or use .contains(text)
-//            if (d.getCOURSE_ID().toLowerCase().contains(text.toLowerCase())
-//                    || d.getCOURSE_TITLE().toLowerCase().contains(text.toLowerCase())) {
-//                temp.add(d);
-//            }
-//
-//        }
-//        try {
-//            adapter.updateList(temp);
-//        } catch (Exception nm) {
-//            nm.printStackTrace();
-//        }
-//
-//    }
-
     public void setRecyclerView_courses(ArrayList<Assignment_content_model> assignment_modelArrayList) {
         try {
             assignment_model.clear();
@@ -286,7 +286,6 @@ public class fragment_download_assignment extends Fragment {
         recyclerView_vertical.setAdapter(adapter);
         swipe_refresh_layout.setRefreshing(false);
     }
-
 
     public void requestDataSources(String uri) {
 

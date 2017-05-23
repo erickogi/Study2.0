@@ -19,6 +19,7 @@ import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
 import com.erickogi14gmail.study20.Main.models.Assignment_content_model;
 import com.erickogi14gmail.study20.Main.models.Chapters;
+import com.erickogi14gmail.study20.Main.models.Revision_model;
 import com.erickogi14gmail.study20.Main.utills.TouchyWebView;
 import com.erickogi14gmail.study20.R;
 
@@ -36,6 +37,7 @@ public class ReadActivity extends AppCompatActivity
     private String assId = "";
     private String html;
     private String url;
+    private String rvId;
     private  int nav_id;
     private  String nav_items[];
 
@@ -103,8 +105,9 @@ public class ReadActivity extends AppCompatActivity
         code = intent.getStringExtra(api.COURSE_CODE);
         assId = intent.getStringExtra(api.ASSIGNMENT_ID);
         url = intent.getStringExtra(api.POST_URL);
+        rvId = intent.getStringExtra(api.REVISION_ID);
 
-        if (assId.equals("null") && url.equals("null")) {
+        if (assId.equals("null") && url.equals("null") && rvId.equals("null")) {
 
             ArrayList<String> list = new ArrayList<>();
             ArrayList<Chapters> chapters = dbOperations.getChaptersByCourse(code);
@@ -147,10 +150,17 @@ public class ReadActivity extends AppCompatActivity
 
             setWebView(html);
             nav_id = 0;
-        } else if (code.equals("null") && url.equals("null")) {
+        } else if (code.equals("null") && url.equals("null") && rvId.equals("null")) {
             ArrayList<Assignment_content_model> data = dbOperations.getAssignmentListById(assId);
             html = data.get(0).getASSIGNMENT_CONTENT();
             getSupportActionBar().setTitle(data.get(0).getASSIGNMENT_NAME());
+
+            setWebView(html);
+            nav_id = 0;
+        } else if (code.equals("null") && url.equals("null") && assId.equals("null")) {
+            ArrayList<Revision_model> data = dbOperations.getRevisionListById(rvId);
+            html = data.get(0).getRevision_content();
+            getSupportActionBar().setTitle(data.get(0).getRevision_title());
 
             setWebView(html);
             nav_id = 0;

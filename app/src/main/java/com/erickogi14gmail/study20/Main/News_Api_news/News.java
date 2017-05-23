@@ -117,7 +117,7 @@ public class News extends AppCompatActivity implements NavigationView.OnNavigati
     void start() {
         localNews fragment_local_news = new localNews();
         internationalNews fragment_international_news = new internationalNews();
-        fragment_local_news.start();
+        //fragment_local_news.start();
         fragment_international_news.start();
     }
 

@@ -44,15 +44,15 @@ public class fragment_saved_assignments extends Fragment {
     static Context context;
     static RecyclerView.LayoutManager mLayoutManager;
     static ArrayList<Course_model> course_model;
+    static AssignmentsAdapter adapter;
+    static ArrayList<Assignment_content_model> data_model;
     AssignmentsAdapter mainRecyclerViewAdapter;
     ArrayList<Course_model> displayedList;
-    AssignmentsAdapter adapter;
     DBOperations dbOperations;
     SwipeRefreshLayout swipe_refresh_layout;
     RecyclerView recyclerView_vertical;
     ProgressDialog progressDialog;
     RecyclerView lv;
-    ArrayList<Assignment_content_model> data_model;
     private Toolbar mToolbar;
     private int progressBarStatus;
     private Handler progressBarHandler = new Handler();
@@ -102,6 +102,8 @@ public class fragment_saved_assignments extends Fragment {
                 intent.putExtra(api.ASSIGNMENT_ID, String.valueOf(data_model.get(position).getASSIGNMENT_ID()));
 
                 intent.putExtra(api.POST_URL, "null");
+
+                intent.putExtra(api.REVISION_ID, "null");
 
                 intent.putExtra(api.COURSE_CODE, "null");
                 //  Log.d("kk",data_model.get(position).getASSIGNMENT_ID())

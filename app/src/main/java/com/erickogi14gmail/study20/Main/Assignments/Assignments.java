@@ -1,6 +1,9 @@
 package com.erickogi14gmail.study20.Main.Assignments;
 
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
@@ -13,6 +16,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -114,6 +118,50 @@ public class Assignments extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+
+            SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+            SearchView search = (SearchView) findViewById(R.id.search_bar);
+
+            search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
+
+            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+
+
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + viewPager.getCurrentItem());
+                    // based on the current position you can then cast the page to the correct
+                    // class and call the method:
+
+                    if (viewPager.getCurrentItem() == 0 && page != null) {
+
+                        // ((FragmentClass1)page).updateList("new item");
+                        fragment_download_assignment.filter(newText);
+
+                    } else {
+                        fragment_saved_assignments.filter(newText);
+                    }
+
+                    return false;
+                }
+            });
+
+        }
+
+
+
+
         return true;
     }
 

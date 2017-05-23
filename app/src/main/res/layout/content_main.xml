@@ -48,17 +48,17 @@
 
     <!--</ScrollView>-->
 
-    <TextView
-        android:layout_width="match_parent"
+    <!--<TextView-->
+    <!--android:layout_width="match_parent"-->
 
 
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+    <!--android:layout_height="wrap_content"-->
+    <!--android:layout_alignParentBottom="true"-->
 
-        android:clickable="false"
-        android:text="Don't Go chasing Headlights! Live"
-        android:textColor="@color/colorPrimaryText"
-        android:textSize="16sp" />
+    <!--android:clickable="false"-->
+    <!--android:text="Don't Go chasing Headlights! Live"-->
+    <!--android:textColor="@color/colorPrimaryText"-->
+    <!--android:textSize="16sp" />-->
 
 
 </RelativeLayout>

@@ -10,6 +10,7 @@ import com.erickogi14gmail.study20.Main.models.Assignment_content_model;
 import com.erickogi14gmail.study20.Main.models.Chapters;
 import com.erickogi14gmail.study20.Main.models.Content_model;
 import com.erickogi14gmail.study20.Main.models.Course_model;
+import com.erickogi14gmail.study20.Main.models.Revision_model;
 
 import java.util.ArrayList;
 
@@ -26,6 +27,14 @@ import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_ASSIGNMENT_TYPE;
 import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_COURSE_ID;
 import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_COURSE_TITLE;
 import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_NO_OF_CHAPTERS;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_CONTENT;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_COURSE_CODE;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_COURSE_NAME;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_DATE;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_ID;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_TITLE;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_UPLOADED_ON;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISON_UPLOADED_BY;
 import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_UPLOADED_BY;
 
 /**
@@ -488,6 +497,166 @@ public class DBOperations {
     public boolean deleteAssignment(String rowId) {
         SQLiteDatabase db = dbHandler.getWritableDatabase();
         return db.delete(DBKeys.ASSIGNMENT_CONTENT_TABLE, KEY_ASSIGNMENT_ID + "= '" + rowId + "' ", null) > 0;
+    }
+
+
+    ////////REVISION
+    public boolean inRevision(Revision_model data) {
+        boolean success = false;
+
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+
+        values.put(KEY_REVISION_ID, data.getId());
+        values.put(KEY_REVISION_TITLE, data.getRevision_title());
+
+
+        values.put(KEY_REVISION_COURSE_CODE, data.getRevision_course_code());
+        values.put(KEY_REVISION_COURSE_NAME, data.getRevision_course_name());
+
+        values.put(KEY_REVISION_DATE, data.getRevision_date());
+
+
+        values.put(KEY_REVISON_UPLOADED_BY, data.getRevision_uploaded_by());
+
+        values.put(KEY_REVISION_CONTENT, data.getRevision_content());
+
+
+        values.put(KEY_REVISION_UPLOADED_ON, data.getRevision_uploaded_on());
+
+
+        // Inserting Row
+        if (db.insert(DBKeys.REVISION_TABLE, null, values) >= 1) {
+            success = true;
+        }
+        db.close();
+
+
+        return success;
+
+
+    }
+
+    public ArrayList<Revision_model> getRevisionList() {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+
+        ArrayList<Revision_model> data = new ArrayList<>();
+        String QUERY = "SELECT * FROM " + DBKeys.REVISION_TABLE;
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            while (cursor.moveToNext()) {
+                Revision_model pojo = new Revision_model();
+
+
+                pojo.setId(cursor.getInt(0));
+                pojo.setRevision_title(cursor.getString(1));
+                pojo.setRevision_course_code(cursor.getString(2));
+                pojo.setRevision_course_name(cursor.getString(3));
+                pojo.setRevision_date(cursor.getString(4));
+                pojo.setRevision_uploaded_by(cursor.getString(5));
+                pojo.setRevision_content(cursor.getString(6));
+                pojo.setRevision_uploaded_on(cursor.getString(7));
+
+
+                data.add(pojo);
+
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+        if (cursor == null) {
+            return null;
+        } else if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+        return data;
+
+
+    }
+
+    public ArrayList<Revision_model> getRevisionListById(String assId) {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+
+        ArrayList<Revision_model> data = new ArrayList<>();
+        String QUERY = "SELECT * FROM " + DBKeys.REVISION_TABLE + "  WHERE " + DBKeys.KEY_REVISION_ID + " = '" + assId + "' ";
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            while (cursor.moveToNext()) {
+                Revision_model pojo = new Revision_model();
+
+
+                pojo.setId(cursor.getInt(0));
+                pojo.setRevision_title(cursor.getString(1));
+                pojo.setRevision_course_code(cursor.getString(2));
+                pojo.setRevision_course_name(cursor.getString(3));
+                pojo.setRevision_date(cursor.getString(4));
+                pojo.setRevision_uploaded_by(cursor.getString(5));
+                pojo.setRevision_content(cursor.getString(6));
+                pojo.setRevision_uploaded_on(cursor.getString(7));
+
+
+                data.add(pojo);
+
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+        if (cursor == null) {
+            return null;
+        } else if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+        return data;
+
+
+    }
+
+    public boolean getRevisionById(String assId) {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+        boolean isThere = false;
+
+        String QUERY = "SELECT * FROM " + DBKeys.REVISION_TABLE + "  WHERE " + DBKeys.KEY_REVISION_ID + " = '" + assId + "' ";
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            if (cursor.moveToNext()) {
+                isThere = true;
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+
+        return isThere;
+
+
+    }
+
+    public boolean deleteRevision(String rowId) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        return db.delete(DBKeys.REVISION_TABLE, KEY_REVISION_ID + "= '" + rowId + "' ", null) > 0;
     }
 
 

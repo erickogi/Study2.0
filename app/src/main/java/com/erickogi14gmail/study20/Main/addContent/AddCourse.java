@@ -1,5 +1,8 @@
 package com.erickogi14gmail.study20.Main.addContent;
 
+import android.app.SearchManager;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -7,6 +10,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 
@@ -76,34 +80,46 @@ public class AddCourse extends AppCompatActivity {
 //
 //            }
 //        });
-//        getRecyclerView_sources();
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//
-//            SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//
-//            SearchView search = (SearchView) findViewById(R.id.search_bar);
-//
-//            search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
-//
-//            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//
-//
-//                @Override
-//                public boolean onQueryTextSubmit(String query) {
-//
-//
-//
-//                    return false;
-//                }
-//
-//                @Override
-//                public boolean onQueryTextChange(String newText) {
-//                    filter(newText);
-//                    return false;
-//                }
-//            });
-//
-//        }
+        // getRecyclerView_sources();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+
+            SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+            SearchView search = (SearchView) findViewById(R.id.search_bar);
+
+            search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
+
+            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+
+
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + viewPager.getCurrentItem());
+                    // based on the current position you can then cast the page to the correct
+                    // class and call the method:
+                    CoueseList c = new CoueseList();
+                    fragment_add_course a = new fragment_add_course();
+                    if (viewPager.getCurrentItem() == 0 && page != null) {
+
+                        // ((FragmentClass1)page).updateList("new item");
+                        CoueseList.filter(newText);
+
+                    } else {
+                        fragment_add_course.filter(newText);
+                    }
+
+                    return false;
+                }
+            });
+
+        }
 //
 //
 //        recyclerView_vertical .addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView_vertical, new RecyclerTouchListener.ClickListener() {

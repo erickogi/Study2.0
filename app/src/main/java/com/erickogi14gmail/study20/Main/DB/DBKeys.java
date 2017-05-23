@@ -47,8 +47,16 @@ public class DBKeys {
     public static final String KEY_ASSIGNMENT_TYPE = "assignment_type";
     public static final String KEY_ASSIGNMENT_CONTENT = "assignment_content";
 
-
-
+    ///REVISION
+    public static final String REVISION_TABLE = "revision_table";
+    public static final String KEY_REVISION_ID = "id";
+    public static final String KEY_REVISION_TITLE = "revision_title";
+    public static final String KEY_REVISION_COURSE_CODE = "revision_course_code";
+    public static final String KEY_REVISION_COURSE_NAME = "revision_course_name";
+    public static final String KEY_REVISION_DATE = "revision_date";
+    public static final String KEY_REVISON_UPLOADED_BY = "revision_uploaded_by";
+    public static final String KEY_REVISION_UPLOADED_ON = "revision_uploaded_on";
+    public static final String KEY_REVISION_CONTENT = "revision_content";
 
 
 

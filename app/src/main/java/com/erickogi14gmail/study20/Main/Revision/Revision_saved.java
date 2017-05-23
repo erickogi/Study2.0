@@ -1,26 +1,31 @@
-package com.erickogi14gmail.study20.Main.addContent;
+package com.erickogi14gmail.study20.Main.Revision;
 
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.erickogi14gmail.study20.Main.Adapters.MainRecyclerViewAdapter;
+import com.android.volley.RequestQueue;
+import com.erickogi14gmail.study20.Main.Adapters.RevisionAdapter;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
 import com.erickogi14gmail.study20.Main.Read.ReadActivity;
-import com.erickogi14gmail.study20.Main.models.Course_model;
+import com.erickogi14gmail.study20.Main.models.Revision_model;
 import com.erickogi14gmail.study20.Main.utills.HidingScrollListener;
 import com.erickogi14gmail.study20.Main.utills.RecyclerTouchListener;
 import com.erickogi14gmail.study20.R;
@@ -28,37 +33,33 @@ import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import java.util.ArrayList;
 
-
 /**
- * Created by kimani kogi on 5/17/2017.
+ * Created by kimani kogi on 5/22/2017.
  */
 
-public class CoueseList extends Fragment {
+public class Revision_saved extends Fragment {
+
     static View view;
+
+    // ArrayList<Assignment_content_model> data_model;
+    static RequestQueue queue;
+    static Context context;
     static RecyclerView.LayoutManager mLayoutManager;
-    static ArrayList<Course_model> data_model;
-    private static MainRecyclerViewAdapter adapter;
-    Cursor cursor;
-    DBOperations dbOperations = new DBOperations(getContext());
-    RecyclerView lv;
+    static ArrayList<Revision_model> revision_model;
+    // static ArrayList<Revision_model> course_model;
+    RevisionAdapter mainRecyclerViewAdapter;
+    RevisionAdapter revisionAdapter;
+    ArrayList<Revision_model> displayedList;
+    RevisionAdapter adapter;
+    DBOperations dbOperations;
     SwipeRefreshLayout swipe_refresh_layout;
+    RecyclerView lv;
+    ProgressDialog progressDialog;
+    private Toolbar mToolbar;
+    private int progressBarStatus;
+    private Handler progressBarHandler = new Handler();
 
-    static void filter(String text) {
-        ArrayList<Course_model> temp = new ArrayList();
-        for (Course_model d : data_model) {
-            //or use .contains(text)
-            if (d.getCOURSE_ID().toLowerCase().contains(text.toLowerCase()) || d.getCOURSE_TITLE().toLowerCase().contains(text.toLowerCase())) {
-                temp.add(d);
-            }
-
-        }
-        try {
-            adapter.updateList(temp);
-        } catch (Exception nm) {
-            nm.printStackTrace();
-        }
-
-    }
+    private StaggeredGridLayoutManager mStaggeredLayoutManager;
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -101,11 +102,12 @@ public class CoueseList extends Fragment {
             @Override
             public void onClick(View view, int position) {
                 Intent intent = new Intent(getActivity(), ReadActivity.class);
-                intent.putExtra(api.COURSE_CODE, data_model.get(position).getCOURSE_ID());
+                intent.putExtra(api.REVISION_ID, String.valueOf(revision_model.get(position).getId()));
                 intent.putExtra(api.ASSIGNMENT_ID, "null");
-                intent.putExtra(api.REVISION_ID, "null");
                 intent.putExtra(api.POST_URL, "null");
 
+                intent.putExtra(api.COURSE_CODE, "null");
+                //  Log.d("kk",data_model.get(position).getASSIGNMENT_ID())
                 startActivity(intent);
 
             }
@@ -115,7 +117,7 @@ public class CoueseList extends Fragment {
 
                 final Dialog dialog = new Dialog(getContext());
                 dialog.setContentView(R.layout.remove_unit_dialog);
-                dialog.setTitle("DELETE COURSE");
+                dialog.setTitle("DELETE ITEM");
                 Button button_delete = (Button) dialog.findViewById(R.id.dialog_button_yes);
                 Button button_keep = (Button) dialog.findViewById(R.id.dialog_button_no);
 
@@ -124,12 +126,12 @@ public class CoueseList extends Fragment {
                     public void onClick(View v) {
                         DBOperations dbOperations = new DBOperations(getContext());
 
-                        if (dbOperations.deleteContent(data_model.get(position).getCOURSE_ID())) {
-                            dbOperations.deleteCourse(data_model.get(position).getCOURSE_ID());
+                        if (dbOperations.deleteRevision(String.valueOf(revision_model.get(position).getId()))) {
+                            // dbOperations.deleteCourse(data_model.get(position).getCOURSE_ID());
                         }
 
                         dialog.dismiss();
-                        data_model.remove(position);
+                        revision_model.remove(position);
                         // notifyDataSetChanged();
                         adapter.notifyDataSetChanged();
                         setRecyclerView();
@@ -164,12 +166,13 @@ public class CoueseList extends Fragment {
         return view;
     }
 
+
     void setRecyclerView() {
 //
         DBOperations dbOperations = new DBOperations(getContext());
-        data_model = dbOperations.getCourseList();
+        revision_model = dbOperations.getRevisionList();
         try {
-            if (data_model.isEmpty() || data_model.equals(null)) {
+            if (revision_model.isEmpty() || revision_model.equals(null)) {
                 swipe_refresh_layout.setRefreshing(false);
                 StyleableToast st = new StyleableToast(getContext(), "You Have No Saved Courses. Click the Add Button Below", Toast.LENGTH_SHORT);
                 st.setBackgroundColor(Color.parseColor("#ff9040"));
@@ -183,7 +186,7 @@ public class CoueseList extends Fragment {
             } else {
 
 
-                adapter = new MainRecyclerViewAdapter(getContext(), data_model);
+                adapter = new RevisionAdapter(getContext(), revision_model, 1);
                 adapter.notifyDataSetChanged();
 
 
@@ -199,7 +202,7 @@ public class CoueseList extends Fragment {
         } catch (Exception a) {
             a.printStackTrace();
             swipe_refresh_layout.setRefreshing(false);
-            StyleableToast st = new StyleableToast(getContext(), "You Have No Saved Courses. Click the Add Button Below", Toast.LENGTH_SHORT);
+            StyleableToast st = new StyleableToast(getContext(), "You Have No Saved Revision Items. Click the Add Button Below", Toast.LENGTH_SHORT);
             st.setBackgroundColor(Color.parseColor("#ff9040"));
             st.setTextColor(Color.WHITE);
             st.setIcon(R.drawable.ic_error_outline_white_24dp);
@@ -210,3 +213,4 @@ public class CoueseList extends Fragment {
         }
     }
 }
+

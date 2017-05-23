@@ -33,7 +33,7 @@ public class PicassoClient {
                     public void onGenerated(Palette palette) {
                         try {
                             int bgColor = palette.getMutedColor(c.getResources().getColor(android.R.color.black));
-                            textView.setBackgroundColor(bgColor);
+                            // textView.setBackgroundColor(bgColor);
                         } catch (Exception n) {
 
                         }

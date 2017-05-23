@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -21,6 +22,7 @@ import com.erickogi14gmail.study20.Main.Adapters.CustomAndroidGridViewAdapter;
 import com.erickogi14gmail.study20.Main.Assignments.Assignments;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.News_Api_news.News;
+import com.erickogi14gmail.study20.Main.Revision.Revision;
 import com.erickogi14gmail.study20.Main.addContent.AddCourse;
 import com.erickogi14gmail.study20.Main.login.Login;
 import com.erickogi14gmail.study20.R;
@@ -37,11 +39,16 @@ public class MainActivity extends AppCompatActivity
 
             "Events ",
 
-            " Works ",
+            "Time Tables ",
+
 
             "Revision Papers ",
 
-            "Time Tables ",
+            " Works ",
+
+            "Surveys",
+
+            "Trade",
 
             "Notifications ",
 
@@ -57,11 +64,16 @@ public class MainActivity extends AppCompatActivity
 //
             R.drawable.events,
 //
-            R.drawable.postwork,
+            R.drawable.timetable,
+
 //
             R.drawable.revisionexams,
 //
-            R.drawable.timetable,
+            R.drawable.postwork,
+
+            R.drawable.survey,
+
+            R.drawable.trade,
 
             R.drawable.notifications,
 
@@ -119,6 +131,16 @@ public class MainActivity extends AppCompatActivity
                         Intent two = new Intent(MainActivity.this, Assignments.class);
                         startActivity(two);
 
+                    } else if (position == 3) {
+
+                        Intent two = new Intent(MainActivity.this, com.erickogi14gmail.study20.Main.Events.Events.class);
+                        startActivity(two);
+
+                    } else if (position == 5) {
+
+                        Intent two = new Intent(MainActivity.this, Revision.class);
+                        startActivity(two);
+
                     }
                 }
             });
@@ -161,14 +183,28 @@ public class MainActivity extends AppCompatActivity
 
 
     @SuppressWarnings("StatementWithEmptyBody")
+
+
     @Override
-
-
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-//
+        if (id == R.id.nav_account) {
+            String base = Environment.getExternalStorageDirectory().getAbsolutePath().toString();
+            Log.d("basegh", base);
+        } else if (id == R.id.nav_settings) {
+
+        } else if (id == R.id.nav_manage) {
+
+        } else if (id == R.id.nav_share) {
+
+        } else if (id == R.id.nav_help) {
+
+        } else if (id == R.id.nav_send) {
+
+        }
+
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

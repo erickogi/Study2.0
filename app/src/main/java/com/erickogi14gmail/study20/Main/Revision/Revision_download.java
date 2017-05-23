@@ -1,4 +1,4 @@
-package com.erickogi14gmail.study20.Main.addContent;
+package com.erickogi14gmail.study20.Main.Revision;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -13,6 +13,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,14 +25,12 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.erickogi14gmail.study20.Main.Adapters.AddRecyclerViewAdapter;
-import com.erickogi14gmail.study20.Main.Adapters.ContentJsonParser;
-import com.erickogi14gmail.study20.Main.Adapters.JsonParser;
-import com.erickogi14gmail.study20.Main.Adapters.MainRecyclerViewAdapter;
+import com.erickogi14gmail.study20.Main.Adapters.RevisionAdapter;
+import com.erickogi14gmail.study20.Main.Adapters.RevisionJsonParser;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
-import com.erickogi14gmail.study20.Main.models.Content_model;
 import com.erickogi14gmail.study20.Main.models.Course_model;
+import com.erickogi14gmail.study20.Main.models.Revision_model;
 import com.erickogi14gmail.study20.Main.utills.RecyclerTouchListener;
 import com.erickogi14gmail.study20.R;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
@@ -39,18 +38,20 @@ import com.muddzdev.styleabletoastlibrary.StyleableToast;
 import java.util.ArrayList;
 
 /**
- * Created by kimani kogi on 5/17/2017.
+ * Created by kimani kogi on 5/22/2017.
  */
 
-public class fragment_add_course extends Fragment {
+public class Revision_download extends Fragment {
+
+
     static View view;
     static RequestQueue queue;
     static Context context;
     static RecyclerView.LayoutManager mLayoutManager;
-    static ArrayList<Course_model> course_model;
-    static AddRecyclerViewAdapter adapter;
-    MainRecyclerViewAdapter mainRecyclerViewAdapter;
-    ArrayList<Course_model> displayedList;
+    static ArrayList<Revision_model> revision_model;
+    RevisionAdapter revisionAdapter;
+    ArrayList<Revision_model> displayedList;
+    RevisionAdapter adapter;
     DBOperations dbOperations;
     SwipeRefreshLayout swipe_refresh_layout;
     RecyclerView recyclerView_vertical;
@@ -60,23 +61,6 @@ public class fragment_add_course extends Fragment {
     private Handler progressBarHandler = new Handler();
 
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
-
-    static void filter(String text) {
-        ArrayList<Course_model> temp = new ArrayList();
-        for (Course_model d : course_model) {
-            //or use .contains(text)
-            if (d.getCOURSE_ID().toLowerCase().contains(text.toLowerCase()) || d.getCOURSE_TITLE().toLowerCase().contains(text.toLowerCase())) {
-                temp.add(d);
-            }
-
-        }
-        try {
-            adapter.updateList(temp);
-        } catch (Exception nm) {
-            nm.printStackTrace();
-        }
-
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -107,11 +91,11 @@ public class fragment_add_course extends Fragment {
         getRecyclerView_sources();
 //        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 //
-//          //  SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+//         //  SearchManager manager = (SearchManager) context.getSystemService();
 //
-//          //  SearchView search = (SearchView) view. findViewById(R.id.search_bar);
+//            SearchView search = (SearchView) view. findViewById(R.id.search_bar);
 //
-//           // search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
+//          //  search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
 //
 //            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 //
@@ -132,25 +116,19 @@ public class fragment_add_course extends Fragment {
 //            });
 //
 //        }
-
+//
 
         recyclerView_vertical.addOnItemTouchListener(new RecyclerTouchListener(getContext(), recyclerView_vertical, new RecyclerTouchListener.ClickListener() {
 
             @Override
             public void onClick(View view, int position) {
-                try {
-                    ArrayList<Content_model> c = new ArrayList<Content_model>();
-                    c.clear();
-
-                } catch (Exception NM) {
-
-                }
 
 
-                String code = course_model.get(position).getCOURSE_ID();
+                String code = String.valueOf(revision_model.get(position).getId());
                 dbOperations = new DBOperations(getContext());
-                if (dbOperations.getCourseById(code)) {
-                    Snackbar.make(view, "You have this Course Downloaded Already", Snackbar.LENGTH_LONG)
+                Log.d("kl", code);
+                if (dbOperations.getAssignmentById(code)) {
+                    Snackbar.make(view, "You have this Revision Item Downloaded Already", Snackbar.LENGTH_LONG)
                             .setAction("Action", null).show();
                 } else {
 
@@ -169,7 +147,7 @@ public class fragment_add_course extends Fragment {
 
                     dbOperations = new DBOperations(getContext());
                     code = code.replaceAll(" ", "%20");
-                    requestDataContent(api.CONTENT_END_POINT + code, position);
+                    requestDataContent(api.REVISION_END_POINT + code, position);
 
                 }
             }
@@ -212,15 +190,24 @@ public class fragment_add_course extends Fragment {
 
     }
 
-    void insert(ArrayList<Content_model> content_models, int position) {
+    void insert(ArrayList<Revision_model> content_models, int position) {
 
         dbOperations = new DBOperations(getContext());
 
-        if (dbOperations.in(content_models)) {
+        if (dbOperations.inRevision(content_models.get(0))) {
 
             content_models.clear();
+            progressDialog.dismiss();
 
-            insertCourse(course_model.get(position));
+            StyleableToast st = new StyleableToast(getContext(), "Saved Successfully", Toast.LENGTH_SHORT);
+            st.setBackgroundColor(Color.parseColor("#ff9040"));
+            st.setTextColor(Color.WHITE);
+
+
+            st.setMaxAlpha();
+            st.show();
+
+
         } else {
             StyleableToast st = new StyleableToast(getContext(), "Storage error 1", Toast.LENGTH_SHORT);
             st.setBackgroundColor(Color.parseColor("#ff9040"));
@@ -235,18 +222,37 @@ public class fragment_add_course extends Fragment {
     }
 
     private void getRecyclerView_sources() {
-        requestDataSources(api.COURSES_END_POINT);
+        requestDataSources(api.REVISION_END_POINT);
     }
 
-    public void setRecyclerView_courses(ArrayList<Course_model> course_modelArrayList) {
+    void filter(String text) {
+        ArrayList<Revision_model> temp = new ArrayList();
+        for (Revision_model d : revision_model) {
+            //or use .contains(text)
+            if (d.getRevision_course_code().toLowerCase().contains(text.toLowerCase())
+                    || d.getRevision_course_name().toLowerCase().contains(text.toLowerCase())) {
+                temp.add(d);
+            }
+
+        }
         try {
-            course_model.clear();
+            adapter.updateList(temp);
+        } catch (Exception nm) {
+            nm.printStackTrace();
+        }
+
+    }
+
+    public void setRecyclerView_courses(ArrayList<Revision_model> revision_modelArrayList) {
+        try {
+            revision_model.clear();
         } catch (Exception MN) {
             MN.printStackTrace();
         }
-        course_model = course_modelArrayList;
+        revision_model = revision_modelArrayList;
+//        Log.d("kj",""+assignment_model.get(1).getASSIGNMENT_COURSE_NAME());
 
-        adapter = new AddRecyclerViewAdapter(getContext(), course_modelArrayList);
+        adapter = new RevisionAdapter(getContext(), revision_modelArrayList, 0);
         adapter.notifyDataSetChanged();
 
         recyclerView_vertical = (RecyclerView) view.findViewById(R.id.recycle_view);
@@ -283,20 +289,20 @@ public class fragment_add_course extends Fragment {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        ArrayList<Course_model> course_modelsArrayList = new ArrayList<>();
+                        ArrayList<Revision_model> revision_modelArrayList = new ArrayList<>();
 
                         if (response != null || !response.isEmpty()) {
                             try {
-                                if (!course_modelsArrayList.isEmpty()) {
-                                    course_modelsArrayList.clear();
+                                if (!revision_modelArrayList.isEmpty()) {
+                                    revision_modelArrayList.clear();
                                 }
-                                course_modelsArrayList.clear();
+                                revision_modelArrayList.clear();
                             } catch (Exception m) {
                                 m.printStackTrace();
                             }
-                            course_modelsArrayList = JsonParser.parseData(response);
-
-                            setRecyclerView_courses(course_modelsArrayList);
+                            revision_modelArrayList = RevisionJsonParser.parseData(response);
+                            Log.d("asdd", "" + revision_modelArrayList);
+                            setRecyclerView_courses(revision_modelArrayList);
 
                         } else {
                             swipe_refresh_layout.setRefreshing(false);
@@ -329,16 +335,16 @@ public class fragment_add_course extends Fragment {
                     @Override
                     public void onResponse(String response) {
 
-                        ArrayList<Content_model> contentModelArrayList;
+                        ArrayList<Revision_model> revision_modelArrayList;
 
 
                         if (response != null || !response.isEmpty()) {
 
 
-                            contentModelArrayList = ContentJsonParser.parseData(response);
+                            revision_modelArrayList = RevisionJsonParser.parseData(response);
                             // progressDialog.setProgress(50);
 
-                            insert(contentModelArrayList, position);
+                            insert(revision_modelArrayList, position);
 
 
                         }

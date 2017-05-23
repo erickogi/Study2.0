@@ -82,6 +82,31 @@ public class DBHandler extends SQLiteOpenHelper {
 
 
             + ")";
+
+
+    String CREATE_TABLE_REVISON = "CREATE TABLE " + DBKeys.REVISION_TABLE + "("
+            + DBKeys.KEY_REVISION_ID + " INTEGER PRIMARY KEY  ,"
+
+
+            + DBKeys.KEY_REVISION_TITLE + " TEXT, "
+
+            + DBKeys.KEY_REVISION_COURSE_CODE + " VARCHAR ,"
+
+            + DBKeys.KEY_REVISION_COURSE_NAME + " VARCHAR ,"
+
+            + DBKeys.KEY_REVISION_DATE + " VARCHAR ,"
+
+            + DBKeys.KEY_REVISON_UPLOADED_BY + " VARCHAR ,"
+
+            + DBKeys.KEY_REVISION_CONTENT + " VARCHAR ,"
+
+            + DBKeys.KEY_REVISION_UPLOADED_ON + " VARCHAR"
+
+            + ")";
+
+
+
+
 //
 //    values.put(KEY_ASSIGNMENT_ID,data.getASSIGNMENT_ID());
 //    values.put(KEY_ASSIGNMENT_NAME,data.getASSIGNMENT_NAME());
@@ -114,6 +139,7 @@ public class DBHandler extends SQLiteOpenHelper {
         db.execSQL(CREATE_TABLE_CONTENT);
         db.execSQL(CREATE_TABLE_ASSIGNMENTS);
         db.execSQL(CREATE_TABLE_ASSIGNMENTS_CONTENT);
+        db.execSQL(CREATE_TABLE_REVISON);
     }
 
     @Override
@@ -123,6 +149,8 @@ public class DBHandler extends SQLiteOpenHelper {
 
         db.execSQL("DROP TABLE IF EXISTS " + DBKeys.ASSIGNMENTS_TABLE);
         db.execSQL("DROP TABLE IF EXISTS " + DBKeys.ASSIGNMENT_CONTENT_TABLE);
+
+        db.execSQL("DROP TABLE IF EXISTS " + DBKeys.REVISION_TABLE);
 
 
         // Create tables again

@@ -256,9 +256,9 @@ public class Events extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_saved) {
-            startActivity(new Intent(Events.this, EventDetails.class));
+            //  startActivity(new Intent(Events.this, EventDetails.class));
         } else if (id == R.id.nav_tickets) {
-            startActivity(new Intent(Events.this, EventDetails.class));
+            //  startActivity(new Intent(Events.this, EventDetails.class));
         } else if (id == R.id.nav_add) {
 
         }

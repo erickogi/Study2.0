@@ -53,10 +53,7 @@
             android:name=".Main.News_Api_news.News"
             android:label="@string/title_activity_news"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".Main.News_Api_news.utils.Categories"
-            android:label="@string/title_activity_categories"
-            android:theme="@style/AppTheme.NoActionBar" />
+
         <activity
             android:name=".Main.News_Api_news.utils.ReadArticle"
             android:label="@string/title_activity_read_article"
@@ -77,6 +74,10 @@
         <activity
             android:name=".Main.Revision.Revision"
             android:label="@string/title_activity_revision"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Main.TimeTables.TimeTables"
+            android:label="@string/title_activity_time_tables"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

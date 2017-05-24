@@ -58,6 +58,23 @@ public class fragment_saved_assignments extends Fragment {
     private Handler progressBarHandler = new Handler();
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
 
+    static void filter(String text) {
+        ArrayList<Assignment_content_model> temp = new ArrayList();
+        for (Assignment_content_model d : data_model) {
+            //or use .contains(text)
+            if (d.getASSIGNMENT_CODE().toLowerCase().contains(text.toLowerCase())
+                    || d.getASSIGNMENT_COURSE_NAME().toLowerCase().contains(text.toLowerCase())) {
+                temp.add(d);
+            }
+
+        }
+        try {
+            adapter.updateList(temp);
+        } catch (Exception nm) {
+            nm.printStackTrace();
+        }
+
+    }
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {

@@ -1,5 +1,6 @@
 package com.erickogi14gmail.study20.Main.News_Api_news;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -9,7 +10,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -17,6 +17,9 @@ import android.view.MenuItem;
 
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.R;
+import com.google.android.gms.ads.AdListener;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.InterstitialAd;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +27,11 @@ import java.util.List;
 public class News extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     public static String category = "";
     static boolean isListView;
+    InterstitialAd mInterstitialAd;
     private TabLayout tabLayout;
     private ViewPager viewPager;
     private Menu menu;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,16 +39,33 @@ public class News extends AppCompatActivity implements NavigationView.OnNavigati
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        mInterstitialAd = new InterstitialAd(this);
+
+        // set the ad unit ID
+        mInterstitialAd.setAdUnitId(getString(R.string.interstitial_full_screen));
+
+        AdRequest adRequest = new AdRequest.Builder()
+                // .addTestDevice("7A16224748E3A88A057B4F3AB8DF6BB1")
+                .build();
+
+        // Load ads into Interstitial Ads
+        mInterstitialAd.loadAd(adRequest);
+
+        mInterstitialAd.setAdListener(new AdListener() {
+            public void onAdLoaded() {
+                showInterstitial();
+            }
+        });
 
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//        drawer.setDrawerListener(toggle);
+//        toggle.syncState();
+//
+//        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+//        navigationView.setNavigationItemSelectedListener(this);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -55,6 +77,11 @@ public class News extends AppCompatActivity implements NavigationView.OnNavigati
         isListView = true;
     }
 
+    private void showInterstitial() {
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        }
+    }
     private void toggle() {
         localNews fragment_local_news = new localNews();
         internationalNews fragment_international_news = new internationalNews();
@@ -93,8 +120,8 @@ public class News extends AppCompatActivity implements NavigationView.OnNavigati
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.news, menu);
-        this.menu = menu;
+        // getMenuInflater().inflate(R.menu.news, menu);
+        // this.menu = menu;
         return true;
     }
 
@@ -107,7 +134,7 @@ public class News extends AppCompatActivity implements NavigationView.OnNavigati
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_toggle) {
-            toggle();
+            // toggle();
             return true;
         }
 
@@ -129,41 +156,74 @@ public class News extends AppCompatActivity implements NavigationView.OnNavigati
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-
+        Intent intent = new Intent(News.this, Categories.class);
         if (id == R.id.nav_all) {
-            category = "";
-            start();
+            // category = "";
+            // start();
 
+//        } else if (id == R.id.nav_tech) {
+//            category = api.KEY_CATEGORY_TECH;
+//            start();
+//
+//
+//        } else if (id == R.id.nav_business) {
+//            category = api.KEY_CATEGORY_BUSINESS;
+//            start();
+//
+//
+//        } else if (id == R.id.nav_entertainment) {
+//            category = api.KEY_CATEGORY_ENTERTAINMENT;
+//            start();
+//
+//        } else if (id == R.id.nav_politics) {
+//            category = api.KEY_CATEGORY_POLITICS;
+//            start();
+//
+//        } else if (id == R.id.nav_music) {
+//            category = api.KEY_CATEGORY_MUSIC;
+//            start();
+//
+//        } else if (id == R.id.nav_science) {
+//            category = api.KEY_CATEGORY_SCIENCE;
+//            start();
+//        } else if (id == R.id.nav_share) {
+//
+//        } else if (id == R.id.nav_sports) {
+//            category = api.KEY_CATEGORY_SPORTS;
+//            start();
         } else if (id == R.id.nav_tech) {
-            category = api.KEY_CATEGORY_TECH;
-            start();
-
-
+            intent.putExtra(api.KEY_CATEGORY_INTENT, api.KEY_CATEGORY_TECH);
+            intent.putExtra(api.KEY_CATEGORY_LABEL, "Technology");
+            startActivity(intent);
         } else if (id == R.id.nav_business) {
-            category = api.KEY_CATEGORY_BUSINESS;
-            start();
-
-
+            intent.putExtra(api.KEY_CATEGORY_INTENT, api.KEY_CATEGORY_BUSINESS);
+            intent.putExtra(api.KEY_CATEGORY_LABEL, "Business");
+            startActivity(intent);
         } else if (id == R.id.nav_entertainment) {
-            category = api.KEY_CATEGORY_ENTERTAINMENT;
-            start();
+            intent.putExtra(api.KEY_CATEGORY_INTENT, api.KEY_CATEGORY_ENTERTAINMENT);
+            intent.putExtra(api.KEY_CATEGORY_LABEL, "Entertainment");
+            startActivity(intent);
 
         } else if (id == R.id.nav_politics) {
-            category = api.KEY_CATEGORY_POLITICS;
-            start();
+            intent.putExtra(api.KEY_CATEGORY_INTENT, api.KEY_CATEGORY_POLITICS);
+            intent.putExtra(api.KEY_CATEGORY_LABEL, "Political");
+            startActivity(intent);
 
         } else if (id == R.id.nav_music) {
-            category = api.KEY_CATEGORY_MUSIC;
-            start();
+            intent.putExtra(api.KEY_CATEGORY_INTENT, api.KEY_CATEGORY_MUSIC);
+            intent.putExtra(api.KEY_CATEGORY_LABEL, "Music");
+            startActivity(intent);
 
         } else if (id == R.id.nav_science) {
-            category = api.KEY_CATEGORY_SCIENCE;
-            start();
-        } else if (id == R.id.nav_share) {
+            intent.putExtra(api.KEY_CATEGORY_INTENT, api.KEY_CATEGORY_SCIENCE);
+            intent.putExtra(api.KEY_CATEGORY_LABEL, "Science/Nature");
+            startActivity(intent);
 
         } else if (id == R.id.nav_sports) {
-            category = api.KEY_CATEGORY_SPORTS;
-            start();
+            intent.putExtra(api.KEY_CATEGORY_INTENT, api.KEY_CATEGORY_SPORTS);
+            intent.putExtra(api.KEY_CATEGORY_LABEL, "Sports");
+            startActivity(intent);
+
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);

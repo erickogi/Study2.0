@@ -17,10 +17,23 @@
 
     <color name="colorPrimaryDark">#1976D2</color>
 
-    <color name="colorAccent">#E040FB</color>
+    <color name="colorAccent">#2196F3</color>
 
     <color name="colorPrimaryText">#212121</color>
     <color name="colorSecondaryText">#757575</color>
 
     <color name="colorIcons">#FFFFFF</color>
+
+    <color name="white">#FFF</color>
+    <color name="blacktext">#000</color>
+    <color name="transparent">#00000000</color>
+    <color name="line">#b7b4b4</color>
+    <color name="note_green">#f44cb746</color>
+    <color name="assignment_orange">#ec8d3a</color>
+    <color name="events_red">#fa4646</color>
+    <color name="news_purple">#8f52de</color>
+    <color name="revision">#3699e1</color>
+    <color name="timetable">#32ab5c</color>
+    <color name="background">#e5e9ec</color>
+    <color name="grey_ivory5">#8f52de</color>
 </resources>

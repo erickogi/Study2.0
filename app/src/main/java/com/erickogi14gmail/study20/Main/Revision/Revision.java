@@ -1,5 +1,8 @@
 package com.erickogi14gmail.study20.Main.Revision;
 
+import android.app.SearchManager;
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -7,9 +10,12 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 
 import com.erickogi14gmail.study20.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +23,31 @@ import java.util.List;
 public class Revision extends AppCompatActivity {
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private AdView mAdView;
+
+    @Override
+    public void onPause() {
+        if (mAdView != null) {
+            mAdView.pause();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mAdView != null) {
+            mAdView.resume();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mAdView != null) {
+            mAdView.destroy();
+        }
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,15 +55,12 @@ public class Revision extends AppCompatActivity {
         setContentView(R.layout.activity_revision);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-//
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder()
+                //   .addTestDevice("7A16224748E3A88A057B4F3AB8DF6BB1")
+                .build();
+        mAdView.loadAd(adRequest);
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
         setupViewPager(viewPager);
@@ -41,12 +69,54 @@ public class Revision extends AppCompatActivity {
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         tabLayout.setupWithViewPager(viewPager);
         setupTabIcons();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+
+            SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+            SearchView search = (SearchView) findViewById(R.id.search_bar);
+
+            search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
+
+            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+
+
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + viewPager.getCurrentItem());
+                    // based on the current position you can then cast the page to the correct
+                    // class and call the method:
+
+                    if (viewPager.getCurrentItem() == 0 && page != null) {
+
+                        // ((FragmentClass1)page).updateList("new item");
+                        Revision_saved.filter(newText);
+
+                    } else if (viewPager.getCurrentItem() == 1 && page != null) {
+                        Revision_download.filter(newText);
+                    } else {
+                        Otherformats.filter(newText);
+                    }
+
+                    return false;
+                }
+            });
+
+        }
     }
 
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new Revision_saved(), "lo");
         adapter.addFragment(new Revision_download(), "in");
+        adapter.addFragment(new Otherformats(), "ot");
 
         viewPager.setOffscreenPageLimit(1);
         viewPager.setAdapter(adapter);
@@ -56,6 +126,7 @@ public class Revision extends AppCompatActivity {
 
         tabLayout.getTabAt(0).setText("SAVED REVISION ITEMS");
         tabLayout.getTabAt(1).setText("DOWNLOAD ITEMS ");
+        tabLayout.getTabAt(2).setText(" BOOKS ");
 
 
     }

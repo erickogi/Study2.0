@@ -78,7 +78,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyViewHold
     @Override
     public EventsAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.events_list, parent, false);
+                .inflate(R.layout.events_list_item, parent, false);
 
         return new MyViewHolder(itemView);
     }
@@ -87,7 +87,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyViewHold
     public void onBindViewHolder(MyViewHolder holder, int position) {
         Events_model model = modelList.get(position);
         holder.textView_list_item_title.setText(model.getEvent_title());
-        holder.textView_list_item_price.setText(model.getEvent_price());
+
         Date startDate = null;
         Date endDate = null;
         DateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -99,11 +99,20 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyViewHold
         }
 
         Calendar cal = Calendar.getInstance();
+        Calendar to = Calendar.getInstance();
         cal.setTime(startDate);
+
         int year = cal.get(Calendar.YEAR);
         int month = cal.get(Calendar.MONTH);
         int day = cal.get(Calendar.DAY_OF_MONTH);
-        holder.textView_list_item_date.setText(day + " " + getMonthName(month) + " " + year);
+        if (cal.getTime().before(to.getTime())) {
+            holder.textView_list_item_date_month.setText("");
+            holder.textView_list_item_date_day.setText("Past");
+        } else {
+            holder.textView_list_item_date_month.setText("" + getMonthName(month));
+            holder.textView_list_item_date_day.setText("" + day);
+        }
+
         holder.textView_list_item_location.setText(model.getEvent_specific_location());
 
         PicassoClient.LoadImage(context, model.getEvent_image(),
@@ -138,7 +147,7 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyViewHold
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         TextView textView_list_item_title,
-                textView_list_item_price, textView_list_item_date,
+                textView_list_item_date_month, textView_list_item_date_day,
                 textView_list_item_location;
         ImageView pic;
 
@@ -146,9 +155,9 @@ public class EventsAdapter extends RecyclerView.Adapter<EventsAdapter.MyViewHold
             super(itemView);
             pic = (ImageView) itemView.findViewById(R.id.event_img);
             textView_list_item_title = (TextView) itemView.findViewById(R.id.event_title);
-            textView_list_item_price = (TextView) itemView.findViewById(R.id.event_price);
+            textView_list_item_date_month = (TextView) itemView.findViewById(R.id.event_date_month);
             textView_list_item_location = (TextView) itemView.findViewById(R.id.event_location);
-            textView_list_item_date = (TextView) itemView.findViewById(R.id.event_date);
+            textView_list_item_date_day = (TextView) itemView.findViewById(R.id.event_date_day);
 
         }
     }

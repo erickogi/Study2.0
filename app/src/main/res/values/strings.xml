@@ -17,10 +17,12 @@
     <string name="title_activity_full_news">Article</string>
 
     <string name="title_activity_register">Register</string>
-    <string name="title_activity_read_article">ReadArticle</string>
+    <string name="title_activity_read_article">News Article</string>
     <string name="title_activity_categories">Categories</string>
 
-
+ <string name="event_desc">Greetings From GDG Moi University. The Google I/O extended Eldoret 2017 is going to be lit
+    happening for the first time in Eldoret Region.Kindly RSVP on the meetup app or website to get a space in this event</string>
+    <string name="desc">Components with responsive elevations may encounter other components as they move betweena</string>
 
     <string name="large_text">
         "Material is the metaphor.\n\n"
@@ -116,7 +118,38 @@
     <string name="title_activity_news">News</string>
     <string name="title_activity_assignments">Assignments</string>
     <string name="title_activity_events">Events</string>
-    <string name="title_activity_event_details">EventDetails</string>
+    <string name="title_activity_event_details">Event Details</string>
     <string name="title_activity_revision">Revision</string>
     <string name="title_activity_time_tables">TimeTables</string>
+    <string name="title_activity_notification_channels">Channels</string>
+    <string name="title_activity_notifications_per_channel">Notifications</string>
+    <string name="title_activity_add_channel">New Channel</string>
+
+
+    <string name="banner_home_footer">ca-app-pub-8584422119530699/1415918769</string>
+    <string name="interstitial_full_screen">ca-app-pub-8584422119530699/2892651960</string>
+
+    <string name="studyadb2">ca-app-pub-8584422119530699/6116816762</string>
+    <string name="studyadb3">ca-app-pub-8584422119530699/3023749565</string>
+
+
+    <string name="studyadb4">ca-app-pub-8584422119530699/6976271160</string>
+
+
+    <string name="studyadb5">ca-app-pub-8584422119530699/8453004367</string>
+
+    <string name="studyadb6">ca-app-pub-8584422119530699/9929737560</string>
+
+    <string name="studyadb7">ca-app-pub-8584422119530699/2406470761</string>
+
+
+    <string name="studyadb8">ca-app-pub-8584422119530699/8313403562</string>
+
+    <string name="studyadb9">ca-app-pub-8584422119530699/9790136769</string>
+
+    <string name="studyadb10">ca-app-pub-8584422119530699/2266869967</string>
+
+    <string name="studyadb11">ca-app-pub-8584422119530699/3743603163</string>
+
+
 </resources>

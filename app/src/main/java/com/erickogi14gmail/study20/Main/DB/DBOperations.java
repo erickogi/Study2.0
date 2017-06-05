@@ -3,14 +3,18 @@ package com.erickogi14gmail.study20.Main.DB;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 
 import com.erickogi14gmail.study20.Main.models.Assignment_content_model;
+import com.erickogi14gmail.study20.Main.models.Channel_model;
 import com.erickogi14gmail.study20.Main.models.Chapters;
 import com.erickogi14gmail.study20.Main.models.Content_model;
 import com.erickogi14gmail.study20.Main.models.Course_model;
+import com.erickogi14gmail.study20.Main.models.Notifications_model;
 import com.erickogi14gmail.study20.Main.models.Revision_model;
+import com.erickogi14gmail.study20.Main.models.TimeTable_model;
 
 import java.util.ArrayList;
 
@@ -36,6 +40,20 @@ import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_TITLE;
 import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISION_UPLOADED_ON;
 import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_REVISON_UPLOADED_BY;
 import static com.erickogi14gmail.study20.Main.DB.DBKeys.KEY_UPLOADED_BY;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.NOTIFICATION_CHANNELS_ID;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.NOTIFICATION_CHANNEL_FROM;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.NOTIFICATION_DATE_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.NOTIFICATION_DESCRIPTION_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.NOTIFICATION_ID_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.NOTIFICATION_READ_STATUS_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.NOTIFICATION_TITLE_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.TIMETABLE_CONTENT_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.TIMETABLE_COURSE_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.TIMETABLE_ID_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.TIMETABLE_PUBLISHED_BY;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.TIMETABLE_PUBLISHED_ON_;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.TIMETABLE_TITLE;
+import static com.erickogi14gmail.study20.Main.DB.DBKeys.TIMEYABLE_COURSE_YEAR;
 
 /**
  * Created by kimani kogi on 4/19/2017.
@@ -330,9 +348,31 @@ public class DBOperations {
 
     }
 
+    public int getNoOfCourses() {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        return (int) DatabaseUtils.queryNumEntries(db, DBKeys.COURSES_TABLE);
+//        int no=0;
+//        String countQuery = "SELECT  * FROM " + DBKeys.COURSES_TABLE;
+//        SQLiteDatabase db = dbHandler.getReadableDatabase();
+//        Cursor cursor = db.rawQuery(countQuery, null);
+//        int cnt = cursor.getCount();
+//        cursor.close();
+//        return cnt;
+    }
+
 
     ///////Assignments
-
+    public int getNoOfAssignments() {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        return (int) DatabaseUtils.queryNumEntries(db, DBKeys.ASSIGNMENT_CONTENT_TABLE);
+//    int no=0;
+//    String countQuery = "SELECT  * FROM " + DBKeys.ASSIGNMENTS_TABLE;
+//    SQLiteDatabase db = dbHandler.getReadableDatabase();
+//    Cursor cursor = db.rawQuery(countQuery, null);
+//    int cnt = cursor.getCount();
+//    cursor.close();
+//    return cnt;
+    }
 
     public boolean inAssignment(Assignment_content_model data) {
         boolean success = false;
@@ -501,6 +541,18 @@ public class DBOperations {
 
 
     ////////REVISION
+
+    public int getNoOfRevesion() {
+        int no = 0;
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        return (int) DatabaseUtils.queryNumEntries(db, DBKeys.REVISION_TABLE);
+//        String countQuery = "SELECT  * FROM " + DBKeys.REVISION_TABLE;
+//        SQLiteDatabase db = dbHandler.getReadableDatabase();
+//        Cursor cursor = db.rawQuery(countQuery, null);
+//        int cnt = cursor.getCount();
+//        cursor.close();
+//        return cnt;
+    }
     public boolean inRevision(Revision_model data) {
         boolean success = false;
 
@@ -659,10 +711,455 @@ public class DBOperations {
         return db.delete(DBKeys.REVISION_TABLE, KEY_REVISION_ID + "= '" + rowId + "' ", null) > 0;
     }
 
+//////NOTIFICATION /CHANNELS
 
 
+    public boolean inNotifications(Notifications_model data) {
+        boolean success = false;
 
 
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        //  SQLiteDatabase db = dbHandler.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        // for (int a = 0; a < data.size(); a++) {
+        try {
+
+            values.put(NOTIFICATION_ID_, data.getNotifications_id());
+            values.put(NOTIFICATION_CHANNEL_FROM, data.getNotification_channel());
+
+
+            values.put(NOTIFICATION_TITLE_, data.getNotifications_title());
+            values.put(NOTIFICATION_DESCRIPTION_, data.getNotifications_description());
+
+            values.put(NOTIFICATION_READ_STATUS_, data.getNotification_status());
+
+
+            values.put(NOTIFICATION_DATE_, data.getNotification_date());
+
+            if (db.insert(DBKeys.NOTIFICATION_TABLE, null, values) >= 1) {
+                success = true;
+            }
+            db.close();
+
+
+        } catch (Exception nm) {
+
+        }
+
+        //d
+//            for (int a = 0; a < data.size(); a++) {
+//try {
+//    SQLiteStatement insert = db.compileStatement("INSERT INTO notifications_table VALUES (?,?,?,?,?,?)");
+//    insert.bindString(1, String.valueOf(data.get(a).getNotifications_id()));
+//    Log.d("notid",String.valueOf(data.get(a).getNotifications_id()));
+//    insert.bindString(2, data.get(a).getNotification_channel());
+//    insert.bindString(3, data.get(a).getNotifications_title());
+//    insert.bindString(4, data.get(a).getNotifications_description());
+//    insert.bindString(5, String.valueOf(data.get(a).getNotification_status()));
+//    insert.bindString(6, data.get(a).getNotification_date());
+//
+//
+//    if (insert.executeInsert() >= 1) {
+//        success = true;
+//
+//    } else {
+//
+//    }
+//}
+//catch (Exception nm){
+//
+//}
+//            }
+        //        db.close();
+
+        return success;
+    }
+
+    public boolean inNotificationChannels(Channel_model data) {
+        boolean success = false;
+        try {
+
+            SQLiteDatabase db = dbHandler.getWritableDatabase();
+
+
+            final SQLiteStatement insert = db.compileStatement("INSERT INTO channels_table VALUES (?,?,?,?)");
+            insert.bindString(1, String.valueOf(data.getNotification_c_id()));
+            insert.bindString(2, data.getNotification_c_name());
+            insert.bindString(3, data.getNotification_c_desc());
+            insert.bindString(4, data.getNotification_c_color());
+
+
+            if (insert.executeInsert() >= 1) {
+                success = true;
+
+            } else {
+
+            }
+
+            db.close();
+        } catch (Exception l) {
+            l.printStackTrace();
+
+        }
+        return success;
+    }
+
+    public boolean deleteNotificationChannel(String rowId) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        return db.delete(DBKeys.NOTIFICATION_CHANNELS_TABLE, NOTIFICATION_CHANNELS_ID + "= '" + rowId + "' ", null) > 0;
+    }
+
+    public boolean deleteNotification(String rowId) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        return db.delete(DBKeys.NOTIFICATION_TABLE, NOTIFICATION_ID_ + "= '" + rowId + "' ", null) > 0;
+    }
+
+
+    public ArrayList<Channel_model> getChannelsList() {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+
+        ArrayList<Channel_model> data = new ArrayList<>();
+        String QUERY = "SELECT * FROM " + DBKeys.NOTIFICATION_CHANNELS_TABLE;
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            while (cursor.moveToNext()) {
+                Channel_model pojo = new Channel_model();
+
+
+                pojo.setNotification_c_id(cursor.getInt(0));
+                pojo.setNotification_c_name(cursor.getString(1));
+                pojo.setNotification_c_desc(cursor.getString(2));
+
+                pojo.setNotification_c_color(cursor.getString(3));
+
+
+                data.add(pojo);
+
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+        if (cursor == null) {
+            return null;
+        } else if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+        return data;
+
+
+    }
+
+    public ArrayList<Notifications_model> getNotificationByChannel(String channel) {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+
+        ArrayList<Notifications_model> data = new ArrayList<>();
+        String QUERY = "SELECT * FROM " + DBKeys.NOTIFICATION_TABLE + " WHERE " + DBKeys.NOTIFICATION_CHANNEL_FROM + " = '" + channel + "' ORDER BY " + DBKeys.NOTIFICATION_ID_ + " DESC ";
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            while (cursor.moveToNext()) {
+                Notifications_model pojo = new Notifications_model();
+
+
+                pojo.setNotifications_id(cursor.getInt(0));
+                pojo.setNotification_channel(cursor.getString(1));
+                pojo.setNotifications_title(cursor.getString(2));
+                pojo.setNotifications_description(cursor.getString(3));
+                pojo.setNotification_status(cursor.getInt(4));
+                pojo.setNotification_date(cursor.getString(5));
+
+
+                data.add(pojo);
+
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+//        if (cursor == null) {
+//            return null;
+//        } else if (!cursor.moveToFirst()) {
+//            cursor.close();
+//            return null;
+//        }
+        return data;
+
+
+    }
+
+
+    public ArrayList<Notifications_model> getNotificationsUnreadByChannel(int status, String channel) {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        ArrayList<Notifications_model> data = new ArrayList<>();
+        String countQuery = "SELECT * FROM " + DBKeys.NOTIFICATION_TABLE + " " +
+                "WHERE " + DBKeys.NOTIFICATION_READ_STATUS_ + " = '" + status + "' AND " + DBKeys.NOTIFICATION_CHANNEL_FROM + "='" + channel + "' ";
+//        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        Cursor cursor = db.rawQuery(countQuery, null);
+
+
+        if (!cursor.isLast()) {
+
+            while (cursor.moveToNext()) {
+                Notifications_model pojo = new Notifications_model();
+
+
+                pojo.setNotifications_id(cursor.getInt(0));
+                pojo.setNotification_channel(cursor.getString(1));
+                pojo.setNotifications_title(cursor.getString(2));
+                pojo.setNotifications_description(cursor.getString(3));
+                pojo.setNotification_status(cursor.getInt(4));
+                pojo.setNotification_date(cursor.getString(5));
+
+
+                data.add(pojo);
+
+            }
+        }
+        db.close();
+
+        return data;
+
+
+    }
+
+    public int getNoOfNotificationsUnread(int status) {
+        int total = 0;
+        try {
+            ArrayList<Channel_model> channels = getChannelsList();
+            if (channels.isEmpty()) {
+
+            } else {
+
+                SQLiteDatabase db = dbHandler.getReadableDatabase();
+                for (int a = 0; a < channels.size(); a++) {
+
+                    total = total + (int) DatabaseUtils.longForQuery(db, "SELECT Count(*) " +
+                            " FROM " + DBKeys.NOTIFICATION_TABLE + " " +
+                            "WHERE " + DBKeys.NOTIFICATION_READ_STATUS_ + " = '" + status + "' " +
+                            "AND " + DBKeys.NOTIFICATION_CHANNEL_FROM + "='" + channels.get(a).getNotification_c_name() + "'", null);
+                }
+            }
+
+        } catch (Exception nm) {
+
+        }
+        return total;
+
+    }
+
+    public int getNoOfNotificationsUnreadByChannel(int status, String chnName) {
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        return (int) DatabaseUtils.longForQuery(db, "SELECT Count(*)  FROM " + DBKeys.NOTIFICATION_TABLE + " " +
+                "WHERE " + DBKeys.NOTIFICATION_READ_STATUS_ + " = '" + status + "' AND " + DBKeys.NOTIFICATION_CHANNEL_FROM + " ='" + chnName + "'", null);
+
+    }
+
+    public boolean getChannelById(String Id) {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+        boolean isThere = false;
+        ArrayList<Course_model> data = new ArrayList<>();
+        String QUERY = "SELECT * FROM " + DBKeys.NOTIFICATION_CHANNELS_TABLE + "  WHERE " + DBKeys.NOTIFICATION_CHANNELS_ID + " = '" + Id + "' ";
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            if (cursor.moveToNext()) {
+                isThere = true;
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+
+        return isThere;
+
+
+    }
+
+    public void updateToRead(int status, String chan) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put(DBKeys.NOTIFICATION_READ_STATUS_, status);
+        db.update(DBKeys.NOTIFICATION_TABLE, cv, DBKeys.NOTIFICATION_CHANNEL_FROM + "='" + chan + "'", null);
+    }
+
+    ////TIMETABLES
+    public int getNoOfTimeTables() {
+        int no = 0;
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+        return (int) DatabaseUtils.queryNumEntries(db, DBKeys.TIMETABLES_TABLE);
+
+    }
+
+    public boolean inTimeTable(TimeTable_model data) {
+        boolean success = false;
+
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        ContentValues values = new ContentValues();
+
+
+        values.put(TIMETABLE_ID_, data.getTimetable_id());
+        values.put(TIMETABLE_TITLE, data.getTimetable_title());
+
+
+        values.put(TIMETABLE_COURSE_, data.getTimetable_course_name());
+        values.put(TIMEYABLE_COURSE_YEAR, data.getTimetable_course_year());
+
+        values.put(TIMETABLE_PUBLISHED_BY, data.getTimetable_published_by());
+
+
+        values.put(TIMETABLE_PUBLISHED_ON_, data.getTimetable_published_on());
+
+        values.put(TIMETABLE_CONTENT_, data.getTimetable_content());
+
+
+        // Inserting Row
+        if (db.insert(DBKeys.TIMETABLES_TABLE, null, values) >= 1) {
+            success = true;
+        }
+        db.close();
+
+
+        return success;
+
+
+    }
+
+    public ArrayList<TimeTable_model> getTimeTablesList() {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+
+        ArrayList<TimeTable_model> data = new ArrayList<>();
+        String QUERY = "SELECT * FROM " + DBKeys.TIMETABLES_TABLE;
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            while (cursor.moveToNext()) {
+                TimeTable_model pojo = new TimeTable_model();
+
+
+                pojo.setTimetable_id(cursor.getInt(0));
+                pojo.setTimetable_title(cursor.getString(1));
+                pojo.setTimetable_course_name(cursor.getString(2));
+                pojo.setTimetable_course_year(cursor.getString(3));
+                pojo.setTimetable_published_by(cursor.getString(4));
+                pojo.setTimetable_published_on(cursor.getString(5));
+                pojo.setTimetable_content(cursor.getString(6));
+
+
+                data.add(pojo);
+
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+        if (cursor == null) {
+            return null;
+        } else if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+        return data;
+
+
+    }
+
+    public ArrayList<TimeTable_model> getTimeTablesListtById(String assId) {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+
+        ArrayList<TimeTable_model> data = new ArrayList<>();
+        String QUERY = "SELECT * FROM " + DBKeys.TIMETABLES_TABLE + "  WHERE " + DBKeys.TIMETABLE_ID_ + " = '" + assId + "' ";
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            while (cursor.moveToNext()) {
+                TimeTable_model pojo = new TimeTable_model();
+
+
+                pojo.setTimetable_id(cursor.getInt(0));
+                pojo.setTimetable_title(cursor.getString(1));
+                pojo.setTimetable_course_name(cursor.getString(2));
+                pojo.setTimetable_course_year(cursor.getString(3));
+                pojo.setTimetable_published_by(cursor.getString(4));
+                pojo.setTimetable_published_on(cursor.getString(5));
+                pojo.setTimetable_content(cursor.getString(6));
+
+
+                data.add(pojo);
+
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+        if (cursor == null) {
+            return null;
+        } else if (!cursor.moveToFirst()) {
+            cursor.close();
+            return null;
+        }
+        return data;
+
+
+    }
+
+    public boolean getTimeTableById(String assId) {
+        //Open connection to read only
+        SQLiteDatabase db = dbHandler.getReadableDatabase();
+
+        boolean isThere = false;
+
+        String QUERY = "SELECT * FROM " + DBKeys.TIMETABLES_TABLE + "  WHERE " + DBKeys.TIMETABLE_ID_ + " = '" + assId + "' ";
+
+
+        Cursor cursor = db.rawQuery(QUERY, null);
+
+        if (!cursor.isLast()) {
+
+            if (cursor.moveToNext()) {
+                isThere = true;
+            }
+        }
+        db.close();
+        // looping through all rows and adding to list
+
+
+        return isThere;
+
+
+    }
+
+    public boolean deleteTimeTable(String rowId) {
+        SQLiteDatabase db = dbHandler.getWritableDatabase();
+        return db.delete(DBKeys.TIMETABLES_TABLE, TIMETABLE_ID_ + "= '" + rowId + "' ", null) > 0;
+    }
 }
 
 

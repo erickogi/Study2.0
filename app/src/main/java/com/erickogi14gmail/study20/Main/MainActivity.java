@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -33,6 +32,7 @@ import com.erickogi14gmail.study20.Main.DB.DBOperations;
 import com.erickogi14gmail.study20.Main.News_Api_news.News;
 import com.erickogi14gmail.study20.Main.Notifications.NotificationChannels;
 import com.erickogi14gmail.study20.Main.Revision.Revision;
+import com.erickogi14gmail.study20.Main.TimeTables.TimeTables;
 import com.erickogi14gmail.study20.Main.addContent.AddCourse;
 import com.erickogi14gmail.study20.Main.login.Login;
 import com.erickogi14gmail.study20.Main.models.Channel_model;
@@ -41,6 +41,8 @@ import com.erickogi14gmail.study20.Main.utills.BadgeDrawable;
 import com.erickogi14gmail.study20.Main.volley.IResult;
 import com.erickogi14gmail.study20.Main.volley.VolleyService;
 import com.erickogi14gmail.study20.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.mikepenz.actionitembadge.library.ActionItemBadge;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
@@ -52,17 +54,14 @@ public class MainActivity extends AppCompatActivity
 
     static IResult mResultCallback = null;
     static VolleyService mVolleyService;
+    boolean admChanel;
     boolean loggedIn;
+    String email;
     DBOperations dbOperations;
     Menu menup;
+    SharedPreferences sharedPreferences;
     private int positionClicked = 0;
-
-    public static void requestDataSources(String uri, Context context) {
-
-        mVolleyService = new VolleyService(mResultCallback, context);
-        mVolleyService.getDataVolley("GETCALL_CHANNELS", uri);
-
-    }
+    private AdView mAdView;
 
     public static void setBadgeCount(Context context, LayerDrawable icon, String count) {
 
@@ -82,6 +81,13 @@ public class MainActivity extends AppCompatActivity
         icon.setDrawableByLayerId(R.id.ic_badge, badge);
         Log.d("kic", "" + icon);
 
+
+    }
+
+    public static void requestDataSources(String uri, Context context) {
+
+        mVolleyService = new VolleyService(mResultCallback, context);
+        mVolleyService.getDataVolley("GETCALL_ADMIN_CHANNEL", uri);
 
     }
 
@@ -115,9 +121,10 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SharedPreferences sharedPreferences = getSharedPreferences(api.SHARED_PREF_NAME, Context.MODE_PRIVATE);
+        sharedPreferences = getSharedPreferences(api.SHARED_PREF_NAME, Context.MODE_PRIVATE);
         loggedIn = sharedPreferences.getBoolean(api.LOGGEDIN_SHARED_PREF, false);
-        loggedIn = true;
+        email = sharedPreferences.getString(api.EMAIL_SHARED_PREF, "@gmail.com");
+        // loggedIn = true;
         Log.d("loginStatus",String.valueOf(loggedIn));
         if(!loggedIn){
 
@@ -126,28 +133,25 @@ public class MainActivity extends AppCompatActivity
             finish();
         }
         else {
+
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
+            setItems();
+            mAdView = (AdView) findViewById(R.id.adView);
+            AdRequest adRequest = new AdRequest.Builder()
+                    //.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                    // .addTestDevice("7A16224748E3A88A057B4F3AB8DF6BB1")
+                    .build();
+            mAdView.loadAd(adRequest);
 
-            int[] results = getDbOperations();
-
-            TextView textViewNoOfUnits = (TextView) findViewById(R.id.txt_noOfUnits);
-            textViewNoOfUnits.setText("" + results[0] + " Units Downloaded");
-
-            TextView textViewNoOfAss = (TextView) findViewById(R.id.txt_noOfAss);
-            textViewNoOfAss.setText("" + results[1] + " Units Downloaded");
-
-            TextView textViewNoOfRev = (TextView) findViewById(R.id.txt_noRev);
-            textViewNoOfRev.setText("" + results[2] + " Revision items Downloaded");
-
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            drawer.setDrawerListener(toggle);
-            toggle.syncState();
-
-            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-            navigationView.setNavigationItemSelectedListener(this);
+//            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+//                    this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//            drawer.setDrawerListener(toggle);
+//            toggle.syncState();
+//
+//            NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+//            navigationView.setNavigationItemSelectedListener(this);
             initVolleyCallback();
             try {
                 getNotices();
@@ -158,10 +162,21 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void getNotices() {
+    void setItems() {
+        int[] results = getDbOperations();
 
-        requestDataSources(api.CHANNELS_END_POINT, getApplicationContext());
 
+        TextView textViewNoOfUnits = (TextView) findViewById(R.id.txt_noOfUnits);
+        textViewNoOfUnits.setText("" + results[0] + " Units Downloaded");
+
+        TextView textViewNoOfAss = (TextView) findViewById(R.id.txt_noOfAss);
+        textViewNoOfAss.setText("" + results[1] + " Units Downloaded");
+
+        TextView textViewNoOfRev = (TextView) findViewById(R.id.txt_noRev);
+        textViewNoOfRev.setText("" + results[2] + " Revision items Downloaded");
+
+        TextView textViewNoOfTT = (TextView) findViewById(R.id.txt_noOfTT);
+        textViewNoOfTT.setText("" + results[3] + " TimeTables items Downloaded");
 
     }
 
@@ -172,33 +187,35 @@ public class MainActivity extends AppCompatActivity
 
                 ArrayList<Channel_model> course_modelsArrayList = new ArrayList<>();
                 ArrayList<Notifications_model> contentModelArrayList;
-                if (requestType.equals("GETCALL_CHANNELS")) {
+
+
+                if (requestType.equals("GETCALL_ADMIN_CHANNEL")) {
                     course_modelsArrayList = ChannelsJsonParser.parseData(response);
-
-                    for (int a = 0; a < course_modelsArrayList.size(); a++) {
-                        int code = course_modelsArrayList.get(a).getNotification_c_id();
-                        dbOperations = new DBOperations(getApplicationContext());
-                        if (dbOperations.getChannelById(String.valueOf(code))) {
-                            String codeh = course_modelsArrayList.get(a).getNotification_c_name().replaceAll(" ", "%20");
-
-                            requestDataContent(api.NOTIFICATIONS_END_POINT + codeh, a);
-
-//                        Snackbar.make(view, "You have this Course Downloaded Already", Snackbar.LENGTH_LONG)
-//                                .setAction("Action", null).show();
-                        } else {
-
-                            dbOperations = new DBOperations(getApplicationContext());
-                            dbOperations.inNotificationChannels(course_modelsArrayList.get(a));
-                            String codeh = course_modelsArrayList.get(a).getNotification_c_name().replaceAll(" ", "%20");
-                            requestDataContent(api.NOTIFICATIONS_END_POINT + codeh, a);
-
+                    dbOperations = new DBOperations(getApplicationContext());
+                    if (dbOperations.inNotificationChannels(course_modelsArrayList.get(0))) {
+                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                        editor.putBoolean(api.ADMINCHANNEL_SHARED_PREF, true);
+                        editor.apply();
                     }
+                    String codeh = course_modelsArrayList.get(0).getNotification_c_name().replaceAll(" ", "%20");
 
-                    }
+                    requestDataContent(api.NOTIFICATIONS_END_POINT + codeh, 0);
+
+
+
+
+
+
 
                 } else if (requestType.equals("GETCALL_CHANNELS_NOTICES")) {
                     contentModelArrayList = NotificationsJsonParser.parseData(response);
-                    insert(contentModelArrayList, positionClicked);
+                    for (int a = 0; a < contentModelArrayList.size(); a++) {
+
+                        insert(contentModelArrayList.get(a), positionClicked);
+                    }
+                    for (int a = 0; a < contentModelArrayList.size(); a++) {
+                        Log.d("notideddf", "" + response);
+                    }
                 }
 
 
@@ -212,26 +229,41 @@ public class MainActivity extends AppCompatActivity
         };
     }
 
-    private void insert(ArrayList<Notifications_model> contentModelArrayList, int positionClicked) {
-        dbOperations = new DBOperations(getApplicationContext());
+    private void getNotices() {
+        admChanel = sharedPreferences.getBoolean(api.ADMINCHANNEL_SHARED_PREF, false);
+        if (admChanel) {
 
-        if (dbOperations.inNotifications(contentModelArrayList)) {
+            ArrayList<Channel_model> chan = getChannelsInDb();
 
-            //content_models.clear();
 
-            // insertChannel(course_model.get(position));
+            requestDataContent(api.NOTIFICATIONS_END_POINT, 0);
+
+
         } else {
-//            StyleableToast st = new StyleableToast(getApplicationContext(), "Storage error 1", Toast.LENGTH_SHORT);
-//            st.setBackgroundColor(Color.parseColor("#ff9040"));
-//            st.setTextColor(Color.WHITE);
-//            st.setIcon(R.drawable.ic_error_outline_white_24dp);
-//
-//            st.setMaxAlpha();
-//            st.show();
-            // progressDialog.dismiss();
-
+            requestDataSources(api.CHANNELS_END_POINT + 1, getApplicationContext());
         }
 
+
+    }
+
+    ArrayList<Channel_model> getChannelsInDb() {
+        DBOperations dbOperations = new DBOperations(MainActivity.this);
+        ArrayList<Channel_model> channelModels = dbOperations.getChannelsList();
+        return channelModels;
+    }
+
+    private int insert(Notifications_model contentModelArrayList, int positionClicked) {
+        dbOperations = new DBOperations(getApplicationContext());
+        int st = 0;
+//        Log.d("notide",""+contentModelArrayList.get(1));
+        if (dbOperations.inNotifications(contentModelArrayList)) {
+            st = 1;
+            setMenuItem();
+
+        } else {
+            st = 1;
+        }
+        return st;
 
     }
 
@@ -253,46 +285,44 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    void setMenuItem() {
+        MenuItem itemCart = menup.getItem(0);
+        //getDbOperations();
+        getNotices();
+        BitmapDrawable iconBitmap = (BitmapDrawable) itemCart.getIcon();
+        DBOperations dbOperations = new DBOperations(MainActivity.this);
+        int badgeCount = dbOperations.getNoOfNotificationsUnread(0);
+        if (badgeCount > 0) {
+            ActionItemBadge.update(this, menup.findItem(R.id.action_notifications), iconBitmap, ActionItemBadge.BadgeStyles.GREEN, badgeCount);
+        } else {
+
+            ActionItemBadge.update(this, menup.findItem(R.id.action_notifications), iconBitmap, ActionItemBadge.BadgeStyles.GREEN, null);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         menup = menu;
-        MenuItem itemCart = menu.getItem(0);
-
-        BitmapDrawable iconBitmap = (BitmapDrawable) itemCart.getIcon();
-        int badgeCount = 9;
-        if (badgeCount > 0) {
-            ActionItemBadge.update(this, menu.findItem(R.id.action_notifications), iconBitmap, ActionItemBadge.BadgeStyles.GREEN, badgeCount);
-        } else {
-            // ActionItemBadge.hide(menu.findItem(R.id.item_samplebadge));
-        }
+        setMenuItem();
 
         //setMenu(menu);
         return true;
     }
 
-    void setMenu(Menu menu) {
-        MenuItem itemCart = menu.getItem(0);
-
-        BitmapDrawable iconBitmap = (BitmapDrawable) itemCart.getIcon();
-        LayerDrawable iconLayer = new LayerDrawable(new Drawable[]{iconBitmap});
-        // setBadgeCount(this, iconLayer, "9");
-
-        //        LayerDrawable icon = (LayerDrawable) itemCart.getIcon();
-        setBadgeCount(this, iconLayer, "9");
-    }
-
     public int[] getDbOperations() {
         DBOperations dbOperations = new DBOperations(MainActivity.this);
-        int no[] = new int[3];
+        int no[] = new int[4];
         int Courses = dbOperations.getNoOfCourses();
         int Ass = dbOperations.getNoOfAssignments();
         int rev = dbOperations.getNoOfRevesion();
+        int tt = dbOperations.getNoOfTimeTables();
 
         no[0] = Courses;
         no[1] = Ass;
         no[2] = rev;
+        no[3] = tt;
 
 
         return no;
@@ -309,6 +339,15 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.action_notifications) {
             startActivity(new Intent(MainActivity.this, NotificationChannels.class));
             return true;
+        } else if (id == R.id.action_share) {
+            Intent in = new Intent();
+            in.setAction(Intent.ACTION_SEND);
+            in.putExtra(Intent.EXTRA_TEXT, " STUDY APP:" + api.APP_SHARE_LINK);
+            in.setType("text/plain");
+            startActivity(in);
+
+        } else if (id == R.id.action_contact) {
+            sendMail();
         }
 
         return super.onOptionsItemSelected(item);
@@ -335,11 +374,6 @@ public class MainActivity extends AppCompatActivity
 
 
         } else if (id == R.id.nav_help) {
-//            FragmentManager fragmentManager = getSupportFragmentManager();
-//            AKDialogFragment newFragment = new AKDialogFragment();
-//            FragmentTransaction transaction = fragmentManager.beginTransaction();
-//            transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-//            transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
         } else if (id == R.id.nav_send) {
             sendMail();
         }
@@ -349,6 +383,37 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        setItems();
+        setMenuItem();
+    }
+
+    @Override
+    public void onPause() {
+        if (mAdView != null) {
+            mAdView.pause();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mAdView != null) {
+            mAdView.resume();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mAdView != null) {
+            mAdView.destroy();
+        }
+        super.onDestroy();
     }
 
     public void sendMail() {
@@ -372,7 +437,14 @@ public class MainActivity extends AppCompatActivity
                 if (editTextMessage.getText().toString().isEmpty() || editTextSubject.getText().toString().isEmpty()) {
                     toast("Fill all fields");
                 } else {
-                    emailResultsToUser(MainActivity.this, editTextSubject.getText().toString(), editTextMessage.getText().toString(), null, null, null, null);
+                    String[] recepient = {"erickogi14@gmail.com"};
+                    emailResultsToUser(MainActivity.this,
+                            editTextSubject.getText().toString(),
+                            editTextMessage.getText().toString(),
+                            "Contact Developer",
+                            recepient,
+                            null,
+                            null);
                     dialog.dismiss();
                 }
             }
@@ -420,6 +492,7 @@ public class MainActivity extends AppCompatActivity
 
     public void openTimetable(View view) {
 
-
+        Intent two = new Intent(MainActivity.this, TimeTables.class);
+        startActivity(two);
     }
 }

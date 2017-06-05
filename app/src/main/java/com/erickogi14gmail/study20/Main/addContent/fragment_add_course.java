@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,27 +11,22 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.erickogi14gmail.study20.Main.Adapters.AddRecyclerViewAdapter;
 import com.erickogi14gmail.study20.Main.Adapters.ContentJsonParser;
 import com.erickogi14gmail.study20.Main.Adapters.JsonParser;
-import com.erickogi14gmail.study20.Main.Adapters.MainRecyclerViewAdapter;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
 import com.erickogi14gmail.study20.Main.models.Content_model;
 import com.erickogi14gmail.study20.Main.models.Course_model;
 import com.erickogi14gmail.study20.Main.utills.RecyclerTouchListener;
+import com.erickogi14gmail.study20.Main.volley.IResult;
+import com.erickogi14gmail.study20.Main.volley.VolleyService;
 import com.erickogi14gmail.study20.R;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
@@ -44,24 +38,22 @@ import java.util.ArrayList;
 
 public class fragment_add_course extends Fragment {
     static View view;
-    static RequestQueue queue;
-    static Context context;
+
     static RecyclerView.LayoutManager mLayoutManager;
     static ArrayList<Course_model> course_model;
+    static ArrayList<Course_model> temp_model;
     static AddRecyclerViewAdapter adapter;
-    MainRecyclerViewAdapter mainRecyclerViewAdapter;
-    ArrayList<Course_model> displayedList;
+    static IResult mResultCallback = null;
+    static VolleyService mVolleyService;
     DBOperations dbOperations;
     SwipeRefreshLayout swipe_refresh_layout;
     RecyclerView recyclerView_vertical;
     ProgressDialog progressDialog;
-    private Toolbar mToolbar;
-    private int progressBarStatus;
-    private Handler progressBarHandler = new Handler();
-
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
+    private int positionClicked = 0;
 
     static void filter(String text) {
+        try {
         ArrayList<Course_model> temp = new ArrayList();
         for (Course_model d : course_model) {
             //or use .contains(text)
@@ -70,11 +62,22 @@ public class fragment_add_course extends Fragment {
             }
 
         }
-        try {
+            temp_model = temp;
             adapter.updateList(temp);
         } catch (Exception nm) {
             nm.printStackTrace();
         }
+
+    }
+
+    static void getRecyclerView_sources(Context context) {
+        requestDataSources(api.COURSES_END_POINT, context);
+    }
+
+    public static void requestDataSources(String uri, Context context) {
+
+        mVolleyService = new VolleyService(mResultCallback, context);
+        mVolleyService.getDataVolley("GETCALL_COURSES", uri);
 
     }
 
@@ -86,7 +89,8 @@ public class fragment_add_course extends Fragment {
          */
 
         view = inflater.inflate(R.layout.fragment_courses, container, false);
-
+        initVolleyCallback();
+        progressDialog = new ProgressDialog(view.getContext());
 
         recyclerView_vertical = (RecyclerView) view.findViewById(R.id.recycle_view);
         swipe_refresh_layout = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
@@ -100,54 +104,19 @@ public class fragment_add_course extends Fragment {
             @Override
             public void onRefresh() {
                 swipe_refresh_layout.setRefreshing(true);
-                getRecyclerView_sources();
+                getRecyclerView_sources(getActivity());
 
             }
         });
-        getRecyclerView_sources();
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//
-//          //  SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//
-//          //  SearchView search = (SearchView) view. findViewById(R.id.search_bar);
-//
-//           // search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
-//
-//            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//
-//
-//                @Override
-//                public boolean onQueryTextSubmit(String query) {
-//
-//
-//
-//                    return false;
-//                }
-//
-//                @Override
-//                public boolean onQueryTextChange(String newText) {
-//                    filter(newText);
-//                    return false;
-//                }
-//            });
-//
-//        }
-
+        getRecyclerView_sources(getActivity());
 
         recyclerView_vertical.addOnItemTouchListener(new RecyclerTouchListener(getContext(), recyclerView_vertical, new RecyclerTouchListener.ClickListener() {
 
             @Override
             public void onClick(View view, int position) {
-                try {
-                    ArrayList<Content_model> c = new ArrayList<Content_model>();
-                    c.clear();
-
-                } catch (Exception NM) {
-
-                }
 
 
-                String code = course_model.get(position).getCOURSE_ID();
+                String code = temp_model.get(position).getCOURSE_ID();
                 dbOperations = new DBOperations(getContext());
                 if (dbOperations.getCourseById(code)) {
                     Snackbar.make(view, "You have this Course Downloaded Already", Snackbar.LENGTH_LONG)
@@ -155,16 +124,16 @@ public class fragment_add_course extends Fragment {
                 } else {
 
 
-                    progressDialog = new ProgressDialog(view.getContext());
+
                     progressDialog.setCancelable(false);
                     progressDialog.setMessage("Downloading content.....");
                     progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    //progressDialog.setProgress(0);
+
                     progressDialog.setIndeterminate(true);
-                    // progressDialog.setMax(100);
+
                     progressDialog.show();
 
-                    progressBarStatus = 0;
+
 
 
                     dbOperations = new DBOperations(getContext());
@@ -188,7 +157,10 @@ public class fragment_add_course extends Fragment {
 
         if (dbOperations.inCourse(data)) {
 
+
+            getRecyclerView_sources(getActivity());
             progressDialog.dismiss();
+            CoueseList.setRecyclerView(getActivity());
 
             StyleableToast st = new StyleableToast(getContext(), "Saved Successfully", Toast.LENGTH_SHORT);
             st.setBackgroundColor(Color.parseColor("#ff9040"));
@@ -234,10 +206,6 @@ public class fragment_add_course extends Fragment {
         }
     }
 
-    private void getRecyclerView_sources() {
-        requestDataSources(api.COURSES_END_POINT);
-    }
-
     public void setRecyclerView_courses(ArrayList<Course_model> course_modelArrayList) {
         try {
             course_model.clear();
@@ -245,26 +213,16 @@ public class fragment_add_course extends Fragment {
             MN.printStackTrace();
         }
         course_model = course_modelArrayList;
+        temp_model = course_model;
 
-        adapter = new AddRecyclerViewAdapter(getContext(), course_modelArrayList);
+        adapter = new AddRecyclerViewAdapter(getContext(), course_modelArrayList, 0);
         adapter.notifyDataSetChanged();
 
         recyclerView_vertical = (RecyclerView) view.findViewById(R.id.recycle_view);
 
         mLayoutManager = new LinearLayoutManager(getContext());
 
-        //      if (this.isListView) {
-//
         mStaggeredLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
-
-
-//        } else {
-//
-//            mStaggeredLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-//
-//
-//        }
-
 
         recyclerView_vertical.setLayoutManager(mStaggeredLayoutManager);
 
@@ -275,93 +233,56 @@ public class fragment_add_course extends Fragment {
         swipe_refresh_layout.setRefreshing(false);
     }
 
+    void initVolleyCallback() {
+        mResultCallback = new IResult() {
+            @Override
+            public void notifySuccess(String requestType, String response) {
 
-    public void requestDataSources(String uri) {
+                ArrayList<Course_model> course_modelsArrayList = new ArrayList<>();
+                ArrayList<Content_model> contentModelArrayList;
+                if (requestType.equals("GETCALL_COURSES")) {
+                    course_modelsArrayList = JsonParser.parseData(response);
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, uri,
+                    setRecyclerView_courses(course_modelsArrayList);
+                } else if (requestType.equals("GETCALL_COURSES_CONTENT")) {
+                    contentModelArrayList = ContentJsonParser.parseData(response);
+                    try {
 
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        ArrayList<Course_model> course_modelsArrayList = new ArrayList<>();
 
-                        if (response != null || !response.isEmpty()) {
-                            try {
-                                if (!course_modelsArrayList.isEmpty()) {
-                                    course_modelsArrayList.clear();
-                                }
-                                course_modelsArrayList.clear();
-                            } catch (Exception m) {
-                                m.printStackTrace();
-                            }
-                            course_modelsArrayList = JsonParser.parseData(response);
-
-                            setRecyclerView_courses(course_modelsArrayList);
-
-                        } else {
-                            swipe_refresh_layout.setRefreshing(false);
-                        }
-
+                        insert(contentModelArrayList, positionClicked);
+                    } catch (Exception M) {
+                        // Toast.makeText(this, "Experiencing some Errors :Error 200-NC", Toast.LENGTH_SHORT).show();
                     }
-                },
-
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        toast("Network Error");
-                        swipe_refresh_layout.setRefreshing(false);
-                        // progressDialog.dismiss();
+                }
 
 
+            }
+
+            @Override
+            public void notifyError(String requestType, VolleyError error) {
+                try {
+                    toast("Network Error");
+                    swipe_refresh_layout.setRefreshing(false);
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
                     }
-                });
-        queue = Volley.newRequestQueue(getContext());
-        queue.add(stringRequest);
-        context = getContext();
+                } catch (Exception cont) {
+                    cont.printStackTrace();
+                }
+
+            }
+        };
     }
-
 
     public void requestDataContent(String uri, final int position) {
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, uri,
-
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        ArrayList<Content_model> contentModelArrayList;
-
-
-                        if (response != null || !response.isEmpty()) {
-
-
-                            contentModelArrayList = ContentJsonParser.parseData(response);
-                            // progressDialog.setProgress(50);
-
-                            insert(contentModelArrayList, position);
-
-
-                        }
-
-
-                    }
-                },
-
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        toast("Network Error");
-                        swipe_refresh_layout.setRefreshing(false);
-                        progressDialog.dismiss();
-                    }
-                });
-
-        queue.add(stringRequest);
-
+        positionClicked = position;
+        mVolleyService = new VolleyService(mResultCallback, getActivity());
+        mVolleyService.getDataVolley("GETCALL_COURSES_CONTENT", uri);
 
     }
 
-    private void toast(String msg) {
+    public void toast(String msg) {
         StyleableToast st = new StyleableToast(getContext(), msg, Toast.LENGTH_SHORT);
         st.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
 
@@ -370,6 +291,8 @@ public class fragment_add_course extends Fragment {
 
         st.setMaxAlpha();
         st.show();
-        //  swipe_refresh_layout.setRefreshing(false);
+
     }
+
+
 }

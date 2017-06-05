@@ -152,7 +152,7 @@ public class localNews extends android.support.v4.app.Fragment {
                 public void onRefresh() {
                     swipe_refresh_layout.setRefreshing(true);
                     StyleableToast st = new StyleableToast(getApplicationContext(), "LOCAL NEWS SOURCES NOT READY YET.. Slide Left to View International News ", Toast.LENGTH_LONG);
-                    st.setBackgroundColor(Color.parseColor("#ff9040"));
+                    st.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
                     st.setTextColor(Color.WHITE);
                     st.setIcon(R.drawable.ic_error_outline_white_24dp);
 

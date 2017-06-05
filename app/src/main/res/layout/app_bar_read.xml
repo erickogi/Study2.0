@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/white"
     android:fitsSystemWindows="true"
     tools:context="com.erickogi14gmail.study20.Main.Read.ReadActivity">
 
@@ -22,23 +24,24 @@
     </android.support.design.widget.AppBarLayout>
 
     <include layout="@layout/content_read" />
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_gravity="bottom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/linear">
+    <!--<LinearLayout-->
+    <!--android:orientation="horizontal"-->
+    <!--android:layout_gravity="bottom"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:id="@+id/linear">-->
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_prev"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"
+        android:layout_gravity="bottom|left"
         android:layout_margin="@dimen/fab_margin"
+        android:visibility="gone"
         app:srcCompat="@drawable/ic_arrow_back_black_24dp" />
 
 
-    </LinearLayout>
+    <!--</LinearLayout>-->
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_next"
@@ -46,9 +49,18 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
 
-        android:visibility="gone"
-
         android:layout_margin="@dimen/fab_margin"
+
+        android:visibility="gone"
         app:srcCompat="@drawable/ic_arrow_forward_black_24dp" />
+
+    <com.google.android.gms.ads.AdView
+
+        android:id="@+id/adView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/studyadb11"></com.google.android.gms.ads.AdView>
 
 </android.support.design.widget.CoordinatorLayout>

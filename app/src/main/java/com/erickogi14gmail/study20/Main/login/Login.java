@@ -7,7 +7,6 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
@@ -21,9 +20,9 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.MainActivity;
 import com.erickogi14gmail.study20.R;
-import com.erickogi14gmail.study20.Main.Configs.api;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import java.util.HashMap;
@@ -31,8 +30,8 @@ import java.util.Map;
 
 public class Login extends AppCompatActivity {
     EditText emailText, passwordText;
-    TextView signUpText;
-    AppCompatButton loginButton;
+    TextView signUpText, loginButton;
+    //  AppCompatButton loginButton;
     private boolean loggedIn = false;
 
     @Override
@@ -47,7 +46,7 @@ public class Login extends AppCompatActivity {
         passwordText = (EditText) findViewById(R.id.input_password);
         signUpText = (TextView) findViewById(R.id.link_signup);
 
-        loginButton = (AppCompatButton) findViewById(R.id.btn_login);
+        loginButton = (TextView) findViewById(R.id.btn_login);
 
         loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,12 +163,14 @@ public class Login extends AppCompatActivity {
 
                             editor.putBoolean(api.LOGGEDIN_SHARED_PREF, true);
                             editor.putString(api.EMAIL_SHARED_PREF, email);
+                            editor.putBoolean(api.ADMINCHANNEL_SHARED_PREF, false);
 
 
                             editor.commit();
 
 
                             Intent intent = new Intent(Login.this, MainActivity.class);
+                            // MainActivity.requestDataSources(api.CHANNELS_END_POINT+1, getApplicationContext());
                             startActivity(intent);
                             finish();
                         } else {

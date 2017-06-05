@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -12,27 +11,22 @@ import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.erickogi14gmail.study20.Main.Adapters.AssignmentDownloadAdapter;
 import com.erickogi14gmail.study20.Main.Adapters.Assignments_content_JsonParser;
-import com.erickogi14gmail.study20.Main.Adapters.MainRecyclerViewAdapter;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
 import com.erickogi14gmail.study20.Main.models.Assignment_content_model;
 import com.erickogi14gmail.study20.Main.models.Course_model;
 import com.erickogi14gmail.study20.Main.utills.RecyclerTouchListener;
+import com.erickogi14gmail.study20.Main.volley.IResult;
+import com.erickogi14gmail.study20.Main.volley.VolleyService;
 import com.erickogi14gmail.study20.R;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
@@ -44,38 +38,51 @@ import java.util.ArrayList;
 
 public class fragment_download_assignment extends Fragment {
     static View view;
-    static RequestQueue queue;
-    static Context context;
+
     static RecyclerView.LayoutManager mLayoutManager;
     static ArrayList<Assignment_content_model> assignment_model;
+    static ArrayList<Assignment_content_model> temp_model;
     static AssignmentDownloadAdapter adapter;
-    MainRecyclerViewAdapter mainRecyclerViewAdapter;
-    ArrayList<Course_model> displayedList;
+    static IResult mResultCallback = null;
+    static VolleyService mVolleyService;
     DBOperations dbOperations;
     SwipeRefreshLayout swipe_refresh_layout;
     RecyclerView recyclerView_vertical;
     ProgressDialog progressDialog;
-    private Toolbar mToolbar;
-    private int progressBarStatus;
-    private Handler progressBarHandler = new Handler();
-
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
+    private String TAG = "MainActivity";
+    private int positionClicked = 0;
 
     static void filter(String text) {
+        try {
         ArrayList<Assignment_content_model> temp = new ArrayList();
         for (Assignment_content_model d : assignment_model) {
             //or use .contains(text)
             if (d.getASSIGNMENT_CODE().toLowerCase().contains(text.toLowerCase())
-                    || d.getASSIGNMENT_COURSE_NAME().toLowerCase().contains(text.toLowerCase())) {
+                    || d.getASSIGNMENT_COURSE_NAME().toLowerCase().contains(text.toLowerCase())
+                    || d.getASSIGNMENT_NAME().toLowerCase().contains(text.toLowerCase())) {
                 temp.add(d);
             }
 
         }
-        try {
+            temp_model = temp;
             adapter.updateList(temp);
         } catch (Exception nm) {
             nm.printStackTrace();
         }
+
+    }
+
+    static void getRecyclerView_sources(Context context) {
+        requestDataSources(api.ASSIGNMENTS_END_POINT, context);
+    }
+
+    public static void requestDataSources(String uri, Context context) {
+
+
+        mVolleyService = new VolleyService(mResultCallback, context);
+        mVolleyService.getDataVolley("GETCALL_ASSIGNMENT", uri);
+
 
     }
 
@@ -87,7 +94,8 @@ public class fragment_download_assignment extends Fragment {
          */
 
         view = inflater.inflate(R.layout.fragment_courses, container, false);
-
+        progressDialog = new ProgressDialog(view.getContext());
+        initVolleyCallback();
 
         recyclerView_vertical = (RecyclerView) view.findViewById(R.id.recycle_view);
         swipe_refresh_layout = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
@@ -101,54 +109,20 @@ public class fragment_download_assignment extends Fragment {
             @Override
             public void onRefresh() {
                 swipe_refresh_layout.setRefreshing(true);
-                getRecyclerView_sources();
+                getRecyclerView_sources(getActivity());
 
             }
         });
-        getRecyclerView_sources();
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//
-//          //  SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//
-//          //  SearchView search = (SearchView) view. findViewById(R.id.search_bar);
-//
-//           // search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
-//
-//            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//
-//
-//                @Override
-//                public boolean onQueryTextSubmit(String query) {
-//
-//
-//
-//                    return false;
-//                }
-//
-//                @Override
-//                public boolean onQueryTextChange(String newText) {
-//                    filter(newText);
-//                    return false;
-//                }
-//            });
-//
-//        }
+        getRecyclerView_sources(getActivity());
 
 
         recyclerView_vertical.addOnItemTouchListener(new RecyclerTouchListener(getContext(), recyclerView_vertical, new RecyclerTouchListener.ClickListener() {
 
             @Override
             public void onClick(View view, int position) {
-//                try {
-//                    ArrayList<Content_model> c = new ArrayList<Content_model>();
-//                    c.clear();
-//
-//                } catch (Exception NM) {
-//
-//                }
 
 
-                String code = String.valueOf(assignment_model.get(position).getASSIGNMENT_ID());
+                String code = String.valueOf(temp_model.get(position).getASSIGNMENT_ID());
                 dbOperations = new DBOperations(getContext());
                 Log.d("kl", code);
                 if (dbOperations.getAssignmentById(code)) {
@@ -157,7 +131,7 @@ public class fragment_download_assignment extends Fragment {
                 } else {
 
 
-                    progressDialog = new ProgressDialog(view.getContext());
+
                     progressDialog.setCancelable(false);
                     progressDialog.setMessage("Downloading content.....");
                     progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
@@ -166,7 +140,7 @@ public class fragment_download_assignment extends Fragment {
                     // progressDialog.setMax(100);
                     progressDialog.show();
 
-                    progressBarStatus = 0;
+
 
 
                     dbOperations = new DBOperations(getContext());
@@ -221,8 +195,9 @@ public class fragment_download_assignment extends Fragment {
         if (dbOperations.inAssignment(content_models.get(position))) {
 
             content_models.clear();
+            getRecyclerView_sources(getActivity());
             progressDialog.dismiss();
-
+            fragment_saved_assignments.setRecyclerView(getActivity());
             StyleableToast st = new StyleableToast(getContext(), "Saved Successfully", Toast.LENGTH_SHORT);
             st.setBackgroundColor(Color.parseColor("#ff9040"));
             st.setTextColor(Color.WHITE);
@@ -245,10 +220,6 @@ public class fragment_download_assignment extends Fragment {
         }
     }
 
-    private void getRecyclerView_sources() {
-        requestDataSources(api.ASSIGNMENTS_END_POINT);
-    }
-
     public void setRecyclerView_courses(ArrayList<Assignment_content_model> assignment_modelArrayList) {
         try {
             assignment_model.clear();
@@ -256,9 +227,10 @@ public class fragment_download_assignment extends Fragment {
             MN.printStackTrace();
         }
         assignment_model = assignment_modelArrayList;
+        temp_model = assignment_model;
 //        Log.d("kj",""+assignment_model.get(1).getASSIGNMENT_COURSE_NAME());
 
-        adapter = new AssignmentDownloadAdapter(getContext(), assignment_modelArrayList);
+        adapter = new AssignmentDownloadAdapter(getContext(), assignment_modelArrayList, 0);
         adapter.notifyDataSetChanged();
 
         recyclerView_vertical = (RecyclerView) view.findViewById(R.id.recycle_view);
@@ -287,93 +259,58 @@ public class fragment_download_assignment extends Fragment {
         swipe_refresh_layout.setRefreshing(false);
     }
 
-    public void requestDataSources(String uri) {
+    void initVolleyCallback() {
+        mResultCallback = new IResult() {
+            @Override
+            public void notifySuccess(String requestType, String response) {
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, uri,
+                ArrayList<Assignment_content_model> assignment_modelsArrayListC;
+                ArrayList<Assignment_content_model> assignment_modelsArrayList = new ArrayList<>();
+                if (requestType.equals("GETCALL_ASSIGNMENT")) {
+                    assignment_modelsArrayList = Assignments_content_JsonParser.parseData(response, 1);
 
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        ArrayList<Assignment_content_model> assignment_modelsArrayList = new ArrayList<>();
+                    setRecyclerView_courses(assignment_modelsArrayList);
+                } else if (requestType.equals("GETCALL_ASSIGNMENT_CONENT")) {
+                    assignment_modelsArrayList = Assignments_content_JsonParser.parseData(response, 2);
+                    // progressDialog.setProgress(50);
 
-                        if (response != null || !response.isEmpty()) {
-                            try {
-                                if (!assignment_modelsArrayList.isEmpty()) {
-                                    assignment_modelsArrayList.clear();
-                                }
-                                assignment_modelsArrayList.clear();
-                            } catch (Exception m) {
-                                m.printStackTrace();
-                            }
-                            assignment_modelsArrayList = Assignments_content_JsonParser.parseData(response, 1);
+                    insert(assignment_modelsArrayList, positionClicked);
+                }
 
-                            setRecyclerView_courses(assignment_modelsArrayList);
 
-                        } else {
-                            swipe_refresh_layout.setRefreshing(false);
-                        }
+                // Log.d(TAG, "Volley requester " + requestType);
+                // Log.d(TAG, "Volley JSON post" + response);
+            }
 
+            @Override
+            public void notifyError(String requestType, VolleyError error) {
+                try {
+                    toast("Network Error", getContext());
+                    swipe_refresh_layout.setRefreshing(false);
+                    if (progressDialog.isShowing()) {
+                        progressDialog.dismiss();
                     }
-                },
+                } catch (Exception cont) {
+                    cont.printStackTrace();
+                }
 
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        toast("Network Error");
-                        swipe_refresh_layout.setRefreshing(false);
-                        // progressDialog.dismiss();
-
-
-                    }
-                });
-        queue = Volley.newRequestQueue(getContext());
-        queue.add(stringRequest);
-        context = getContext();
+                //  Log.d(TAG, "Volley requester " + requestType);
+                //  Log.d(TAG, "Volley JSON post" + "That didn't work!");
+            }
+        };
     }
-
 
     public void requestDataContent(String uri, final int position) {
 
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, uri,
-
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        ArrayList<Assignment_content_model> assignment_modelsArrayList;
-
-
-                        if (response != null || !response.isEmpty()) {
-
-
-                            assignment_modelsArrayList = Assignments_content_JsonParser.parseData(response, 2);
-                            // progressDialog.setProgress(50);
-
-                            insert(assignment_modelsArrayList, position);
-
-
-                        }
-
-
-                    }
-                },
-
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        toast("Network Error");
-                        swipe_refresh_layout.setRefreshing(false);
-                        progressDialog.dismiss();
-                    }
-                });
-
-        queue.add(stringRequest);
+        mVolleyService = new VolleyService(mResultCallback, getActivity());
+        mVolleyService.getDataVolley("GETCALL_ASSIGNMENT_CONENT", uri);
+        positionClicked = position;
 
 
     }
 
-    private void toast(String msg) {
-        StyleableToast st = new StyleableToast(getContext(), msg, Toast.LENGTH_SHORT);
+    private void toast(String msg, Context context) {
+        StyleableToast st = new StyleableToast(context, msg, Toast.LENGTH_SHORT);
         st.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
 
         st.setTextColor(getResources().getColor(R.color.colorIcons));
@@ -383,5 +320,7 @@ public class fragment_download_assignment extends Fragment {
         st.show();
         //  swipe_refresh_layout.setRefreshing(false);
     }
+
+
 }
 

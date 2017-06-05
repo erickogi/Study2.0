@@ -5,7 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
@@ -34,9 +34,14 @@ public class RevisionAdapter extends RecyclerView.Adapter<RevisionAdapter.MyView
 
     @Override
     public RevisionAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.revision_list_item, parent, false);
-
+        View itemView = null;
+        if (a == 0) {
+            itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.revision_list_item, parent, false);
+        } else {
+            itemView = LayoutInflater.from(parent.getContext())
+                    .inflate(R.layout.revision_list_item_downloaded, parent, false);
+        }
         return new MyViewHolder(itemView);
     }
 
@@ -51,12 +56,12 @@ public class RevisionAdapter extends RecyclerView.Adapter<RevisionAdapter.MyView
         if (a == 0) {
             DBOperations dbOperations = new DBOperations(context);
             if (dbOperations.getRevisionById(String.valueOf(model.getId()))) {
-                holder.state.setImageResource(R.drawable.ic_check_circle_black_24dp);
+                //holder.state.setImageResource(R.drawable.ic_check_circle_black_24dp);
+                holder.state.setText("Saved");
             } else {
-                holder.state.setImageResource(R.drawable.ic_get_app_black_24dp);
+                //  holder.state.setImageResource(R.drawable.ic_get_app_black_24dp);
+                holder.state.setText("Download");
             }
-        } else {
-            holder.state.setVisibility(View.INVISIBLE);
         }
 
 
@@ -83,11 +88,13 @@ public class RevisionAdapter extends RecyclerView.Adapter<RevisionAdapter.MyView
         TextView textView_list_item_title,
                 textView_list_item_name, textView_list_item_date,
                 textView_list_item_by;
-        ImageView state;
+        Button state;
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            state = (ImageView) itemView.findViewById(R.id.btn_status);
+            if (a == 0) {
+                state = (Button) itemView.findViewById(R.id.btn_status);
+            }
             textView_list_item_title = (TextView) itemView.findViewById(R.id.list_item_title);
             textView_list_item_name = (TextView) itemView.findViewById(R.id.list_item_course_name);
             textView_list_item_by = (TextView) itemView.findViewById(R.id.list_item_by);

@@ -2,18 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.erickogi14gmail.study20">
 
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <activity
-        android:name=".News.ReadArticle"
-        android:label="@string/title_activity_read_article"
-        android:parentActivityName=".MainActivity"
-        android:theme="@style/AppTheme.NoActionBar" />
-    <activity
-        android:name=".News.Categories"
-        android:label="@string/title_activity_categories"
-        android:parentActivityName=".MainActivity"
-        android:theme="@style/AppTheme.NoActionBar" />
+    <meta-data
+        android:name="com.google.android.gms.version"
+        android:value="@integer/google_play_services_version" />
 
     <application
         android:allowBackup="true"
@@ -37,6 +32,15 @@
             android:parentActivityName=".Main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name=".Main.News_Api_news.utils.ReadArticle"
+            android:label="@string/title_activity_read_article"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Main.News_Api_news.Categories"
+            android:label="@string/title_activity_categories"
+            android:parentActivityName=".Main.News_Api_news.News"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name=".Main.addContent.AddCourse"
             android:label="@string/title_activity_add_course"
             android:parentActivityName=".Main.MainActivity"
@@ -52,33 +56,66 @@
         <activity
             android:name=".Main.News_Api_news.News"
             android:label="@string/title_activity_news"
+            android:parentActivityName=".Main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-
-        <activity
-            android:name=".Main.News_Api_news.utils.ReadArticle"
-            android:label="@string/title_activity_read_article"
-            android:parentActivityName=".Main.News_Api_news.News"
-            android:theme="@style/AppTheme.NoActionBar" />
+        <!--<activity-->
+        <!--android:name=".Main.News_Api_news.utils.ReadArticle"-->
+        <!--android:label="@string/title_activity_read_article"-->
+        <!--android:parentActivityName=".Main.News_Api_news.News"-->
+        <!--android:theme="@style/AppTheme.NoActionBar" />-->
         <activity
             android:name=".Main.Assignments.Assignments"
             android:label="@string/title_activity_assignments"
+            android:parentActivityName=".Main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Main.Events.Events"
             android:label="@string/title_activity_events"
+            android:parentActivityName=".Main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Main.Events.EventDetails"
             android:label="@string/title_activity_event_details"
+            android:parentActivityName=".Main.Events.Events"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Main.Revision.Revision"
             android:label="@string/title_activity_revision"
+            android:parentActivityName=".Main.MainActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".Main.TimeTables.TimeTables"
             android:label="@string/title_activity_time_tables"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:parentActivityName=".Main.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Main.Notifications.NotificationChannels"
+            android:label="@string/title_activity_notification_channels"
+            android:parentActivityName=".Main.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Main.Notifications.NotificationsPerChannel"
+            android:label="@string/title_activity_notifications_per_channel"
+            android:parentActivityName=".Main.Notifications.NotificationChannels"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Main.Revision.MyPdfViewActivity"
+            android:label="BOOK"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".Main.Notifications.AddChannel"
+            android:label="@string/title_activity_add_channel"
+            android:parentActivityName=".Main.Notifications.NotificationChannels"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Main.TimeTables.ReadTimeTable" />
+        <activity
+            android:name="com.google.android.gms.ads.AdActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
+            android:theme="@android:style/Theme.Translucent" />
+        <!--<activity-->
+        <!--android:name=".Main.News_Api_news.Categories"-->
+        <!--android:label="@string/title_activity_categories"-->
+        <!--android:theme="@style/AppTheme.NoActionBar"></activity>-->
     </application>
 
 </manifest>

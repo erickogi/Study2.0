@@ -4,13 +4,14 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.mPicasso.PicassoClient;
 import com.erickogi14gmail.study20.Main.models.Events_model;
 import com.erickogi14gmail.study20.R;
@@ -26,8 +27,8 @@ public class EventDetails extends AppCompatActivity {
     ImageView imageView, imageViewCalendar, imageViewMaps, imageViewTicket;
     TextView textViewTitle, textViewBy, textViewStart, textViewEnd, textViewGl, textViewSl,
             textViewPrice, textViewDescription, textViewOrganizer;
-    Button buttonSave, buttonShare;
-
+    FloatingActionButton buttonSave, buttonShare;
+    FloatingActionButton fab;
 
     Events_model model;
 
@@ -37,6 +38,7 @@ public class EventDetails extends AppCompatActivity {
         setContentView(R.layout.activity_event_details);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         imageView = (ImageView) findViewById(R.id.event_img);
         textViewTitle = (TextView) findViewById(R.id.event_titlef);
         textViewBy = (TextView) findViewById(R.id.event_byf);
@@ -52,8 +54,8 @@ public class EventDetails extends AppCompatActivity {
         imageViewMaps = (ImageView) findViewById(R.id.event_location);
         imageViewTicket = (ImageView) findViewById(R.id.event_ticket);
 
-        buttonSave = (Button) findViewById(R.id.event_save);
-        buttonShare = (Button) findViewById(R.id.event_share);
+        buttonSave = (FloatingActionButton) findViewById(R.id.event_save);
+        buttonShare = (FloatingActionButton) findViewById(R.id.event_share);
 
         imageViewCalendar.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,7 +85,12 @@ public class EventDetails extends AppCompatActivity {
         buttonShare.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent in = new Intent();
+                in.setAction(Intent.ACTION_SEND);
+                in.putExtra(Intent.EXTRA_TEXT, "" + textViewTitle.getText() + "\n" + textViewDescription.getText() + "\n" + textViewSl.getText()
+                        + "\n View More Events By getting Study app \n " + api.APP_SHARE_LINK);
+                in.setType("text/plain");
+                startActivity(in);
             }
         });
 

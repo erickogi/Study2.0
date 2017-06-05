@@ -14,10 +14,10 @@
             android:id="@+id/nav_settings"
             android:icon="@drawable/settings"
             android:title="App Settings" />
-        <item
-            android:id="@+id/nav_manage"
-            android:icon="@drawable/subscription"
-            android:title="Subscriptions" />
+        <!--<item-->
+        <!--android:id="@+id/nav_manage"-->
+        <!--android:icon="@drawable/subscription"-->
+        <!--android:title="Subscriptions" />-->
     </group>
 
     <item android:title="Communicate">

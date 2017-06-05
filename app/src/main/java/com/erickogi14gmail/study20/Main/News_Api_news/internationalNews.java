@@ -4,23 +4,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.News_Api_news.utils.ArticlesJsonParser;
 import com.erickogi14gmail.study20.Main.News_Api_news.utils.ArticlesModel;
@@ -31,6 +26,8 @@ import com.erickogi14gmail.study20.Main.News_Api_news.utils.SourcesJsonParser;
 import com.erickogi14gmail.study20.Main.News_Api_news.utils.SourcesModel;
 import com.erickogi14gmail.study20.Main.utills.RecyclerTouchListener;
 import com.erickogi14gmail.study20.Main.utills.StaggeredHiddingScrollListener;
+import com.erickogi14gmail.study20.Main.volley.IResult;
+import com.erickogi14gmail.study20.Main.volley.VolleyService;
 import com.erickogi14gmail.study20.R;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
@@ -41,7 +38,7 @@ import java.util.ArrayList;
  */
 
 public class internationalNews extends android.support.v4.app.Fragment {
-    static RequestQueue queue;
+
     static Context context;
     static RecyclerView.LayoutManager mLayoutManager;
     static View view;
@@ -51,25 +48,19 @@ public class internationalNews extends android.support.v4.app.Fragment {
     SwipeRefreshLayout swipe_refresh_layout;
     RecyclerView recyclerView_vertical;
     RecyclerView recyclerView_horizontal;
-    FloatingActionButton fab;
+
     ArrayList<SourcesModel> sources;
+    IResult mResultCallback = null;
+    VolleyService mVolleyService;
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
 
     public void start() {
         refresh();
 
-        getRecyclerView_sourcesC();
+        getRecyclerView_sources();
     }
 
-    void getRecyclerView_sourcesC() {
-        if (News.category.equals("")) {
-            requestDataSourcesC(api.SOURCES_END_POINT);
-        } else {
 
-            requestDataSourcesC(api.SOURCES_END_POINT + "?category=" + News.category);
-        }
-        // requestDataSources(api.SOURCES_END_POINT);
-    }
 
     private void refresh() {
         swipe_refresh_layout = (SwipeRefreshLayout) view.findViewById(R.id.swipeContainer);
@@ -89,6 +80,7 @@ public class internationalNews extends android.support.v4.app.Fragment {
 
 
         view = inflater.inflate(R.layout.fragment_all_news, container, false);
+        initVolleyCallback();
         mStaggeredLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.HORIZONTAL);
 
         recyclerView_horizontal = (RecyclerView) view.findViewById(R.id.all_news_horizontal_recyclerView);
@@ -104,7 +96,7 @@ public class internationalNews extends android.support.v4.app.Fragment {
             }
         });
 
-        fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
+        // fab = (FloatingActionButton) getActivity().findViewById(R.id.fab);
         recyclerView_horizontal.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView_horizontal, new RecyclerTouchListener.ClickListener() {
 
             @Override
@@ -162,14 +154,11 @@ public class internationalNews extends android.support.v4.app.Fragment {
 
 
     private void hideViews() {
-        fab.hide();
-        // int fabBottomMargin = 45;
-        // fab.animate().translationY(fab.getHeight() + fabBottomMargin).setInterpolator(new AccelerateInterpolator(2)).start();
+
     }
 
     private void showViews() {
-        fab.hide();
-        // fab.animate().translationY(0).setInterpolator(new DecelerateInterpolator(2)).start();
+
 
     }
 
@@ -187,8 +176,19 @@ public class internationalNews extends android.support.v4.app.Fragment {
         if (News.category.equals("")) {
             requestDataSources(api.SOURCES_END_POINT);
         } else {
-
+            // requestDataSources(api.SOURCES_END_POINT );
             requestDataSources(api.SOURCES_END_POINT + "?category=" + News.category);
+        }
+        // requestDataSources(api.SOURCES_END_POINT);
+    }
+
+    void getRecyclerView_sourcesC() {
+        if (News.category.equals("")) {
+            requestDataSourcesC(api.SOURCES_END_POINT);
+        } else {
+
+            requestDataSourcesC(api.SOURCES_END_POINT + "?category=" + News.category);
+            Log.d("newsss", "" + api.SOURCES_END_POINT + "?category=" + News.category);
         }
         // requestDataSources(api.SOURCES_END_POINT);
     }
@@ -255,86 +255,56 @@ public class internationalNews extends android.support.v4.app.Fragment {
         swipe_refresh_layout.setRefreshing(false);
     }
 
+    void initVolleyCallback() {
+        mResultCallback = new IResult() {
+            @Override
+            public void notifySuccess(String requestType, String response) {
+
+                ArrayList<SourcesModel> sourcesModelArrayList;
+                ArrayList<ArticlesModel> articlesModelArrayList;
+                ArrayList<SourcesModel> sourcesModelArrayListC;
+                if (requestType.equals("GETCALL_NEWS_SOURCES")) {
+                    sourcesModelArrayList = SourcesJsonParser.parseData(response, api.ALL_SORUCES_PARSING_CODE);
+                    Log.d("newsss", "" + response);
+                    setRecyclerView_sources(sourcesModelArrayList);
+                } else if (requestType.equals("GETCALL_NEWS_ARTICLES")) {
+                    articlesModelArrayList = ArticlesJsonParser.parseData(response);
+
+                    setRecyclerView_articles(articlesModelArrayList);
+                } else if (requestType.equals("GETCALL_NEWS_SOURCESC")) {
+                    sourcesModelArrayListC = SourcesJsonParser.parseData(response, api.ALL_SORUCES_PARSING_CODE);
+
+                    setRecyclerView_sources(sourcesModelArrayListC);
+                }
+
+
+            }
+
+            @Override
+            public void notifyError(String requestType, VolleyError error) {
+
+
+                try {
+                    toast("Network Error");
+                    swipe_refresh_layout.setRefreshing(false);
+                } catch (Exception cont) {
+                    cont.printStackTrace();
+                }
+            }
+        };
+    }
+
     public void requestDataSources(String uri) {
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, uri,
 
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        ArrayList<SourcesModel> sourcesModelArrayList;
-
-                        if (response != null || !response.isEmpty()) {
-
-                            sourcesModelArrayList = SourcesJsonParser.parseData(response, api.ALL_SORUCES_PARSING_CODE);
-
-                            setRecyclerView_sources(sourcesModelArrayList);
-
-                        } else {
-                            swipe_refresh_layout.setRefreshing(false);
-                        }
-
-                    }
-                },
-
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        StyleableToast st = new StyleableToast(getApplicationContext(), "Network error", Toast.LENGTH_SHORT);
-                        st.setBackgroundColor(Color.parseColor("#ff9040"));
-                        st.setTextColor(Color.WHITE);
-                        st.setIcon(R.drawable.ic_error_outline_white_24dp);
-
-                        st.setMaxAlpha();
-                        st.show();
-                        swipe_refresh_layout.setRefreshing(false);
+        mVolleyService = new VolleyService(mResultCallback, getActivity());
+        mVolleyService.getDataVolley("GETCALL_NEWS_SOURCES", uri);
 
 
-                    }
-                });
-        queue = Volley.newRequestQueue(getContext());
-        queue.add(stringRequest);
-        context = getContext();
     }
 
     public void requestDataArticles(String uri) {
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, uri,
-
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-
-                        ArrayList<ArticlesModel> articlesModelArrayList;
-
-                        if (response != null || !response.isEmpty()) {
-
-                            articlesModelArrayList = ArticlesJsonParser.parseData(response);
-
-
-                            setRecyclerView_articles(articlesModelArrayList);
-
-
-                        }
-
-
-                    }
-                },
-
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        StyleableToast st = new StyleableToast(getApplicationContext(), "Network error", Toast.LENGTH_SHORT);
-                        st.setBackgroundColor(Color.parseColor("#ff9040"));
-                        st.setTextColor(Color.WHITE);
-                        st.setIcon(R.drawable.ic_error_outline_white_24dp);
-
-                        st.setMaxAlpha();
-                        st.show();
-                        swipe_refresh_layout.setRefreshing(false);
-                    }
-                });
-
-        queue.add(stringRequest);
+        mVolleyService = new VolleyService(mResultCallback, getActivity());
+        mVolleyService.getDataVolley("GETCALL_NEWS_ARTICLES", uri);
 
 
     }
@@ -346,45 +316,26 @@ public class internationalNews extends android.support.v4.app.Fragment {
     }
 
     public void requestDataSourcesC(String uri) {
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, uri,
 
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        ArrayList<SourcesModel> sourcesModelArrayList;
+        mVolleyService = new VolleyService(mResultCallback, getApplicationContext());
+        mVolleyService.getDataVolley("GETCALL_NEWS_SOURCESC", uri);
 
-                        if (response != null || !response.isEmpty()) {
-
-                            sourcesModelArrayList = SourcesJsonParser.parseData(response, api.ALL_SORUCES_PARSING_CODE);
-
-                            setRecyclerView_sources(sourcesModelArrayList);
-
-                        } else {
-                            swipe_refresh_layout.setRefreshing(false);
-                        }
-
-                    }
-                },
-
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-//                        StyleableToast st = new StyleableToast(getApplicationContext(), "Network error", Toast.LENGTH_SHORT);
-//                        st.setBackgroundColor(Color.parseColor("#ff9040"));
-//                        st.setTextColor(Color.WHITE);
-//                        st.setIcon(R.drawable.ic_error_outline_white_24dp);
-//
-//                        st.setMaxAlpha();
-//                        st.show();
-                        swipe_refresh_layout.setRefreshing(false);
-
-
-                    }
-                });
-        queue.add(stringRequest);
     }
-}
 
+    private void toast(String msg) {
+        StyleableToast st = new StyleableToast(getContext(), msg, Toast.LENGTH_SHORT);
+        st.setBackgroundColor(getResources().getColor(R.color.colorPrimary));
+
+        st.setTextColor(getResources().getColor(R.color.colorIcons));
+        st.setIcon(R.drawable.ic_error_outline_white_24dp);
+
+        st.setMaxAlpha();
+        st.show();
+        //  swipe_refresh_layout.setRefreshing(false);
+    }
+
+
+}
 
 
 

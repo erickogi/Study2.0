@@ -5,6 +5,8 @@
     android:id="@+id/content_read"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginBottom="50dp"
+
 
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="com.erickogi14gmail.study20.Main.Read.ReadActivity"
@@ -13,15 +15,30 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">-->
 
+
         <com.erickogi14gmail.study20.Main.utills.TouchyWebView
 
-             android:layout_margin="4dp"
-            android:id="@+id/webView"
-            android:linksClickable="true"
 
-            android:textIsSelectable="true"
+            android:id="@+id/webView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+
+            android:layout_margin="4dp"
+            android:linksClickable="true"
+            android:textIsSelectable="true" />
+    <!--<com.google.android.gms.ads.AdView-->
+    <!---->
+    <!--android:layout_alignParentBottom="true"-->
+
+    <!--android:layout_gravity="bottom"-->
+    <!--android:id="@+id/adView"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--ads:adSize="BANNER"-->
+    <!--ads:adUnitId="@string/banner_home_footer">-->
+    <!--</com.google.android.gms.ads.AdView>-->
+
+
     <!--</ScrollView>-->
 
 </RelativeLayout>

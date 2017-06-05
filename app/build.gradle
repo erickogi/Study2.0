@@ -7,8 +7,8 @@ android {
         applicationId "com.erickogi14gmail.study20"
         minSdkVersion 16
         targetSdkVersion 22
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
@@ -25,6 +25,7 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
+
     compile 'de.hdodenhof:circleimageview:2.1.0'
     compile 'com.android.support:appcompat-v7:25.2.0'
     compile 'com.android.support:design:25.2.0'
@@ -34,10 +35,17 @@ dependencies {
     compile 'com.muddzdev:styleabletoast:1.0.7'
 
     compile 'com.android.support:recyclerview-v7:25.0.0'
-
+    compile 'com.google.android.gms:play-services-ads:8.4.0'
 
     compile 'com.android.support:palette-v7:25.2.0'
 
     compile 'com.squareup.picasso:picasso:2.5.2'
     testCompile 'junit:junit:4.12'
+    compile 'com.mikepenz:actionitembadge:3.3.1@aar'
+
+    //SUB-DEPENDENCIES
+    //Android-Iconics - used to provide an easy API for icons
+    compile 'com.mikepenz:iconics-core:2.8.1@aar'
+
+
 }

@@ -40,6 +40,19 @@ public class Register  extends AppCompatActivity {
     EditText passwordText;
     Button signupButton;
     TextView loginLink;
+
+    public static boolean isValidPassword(final String password) {
+
+        Pattern pattern;
+        Matcher matcher;
+        final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{4,}$";
+        pattern = Pattern.compile(PASSWORD_PATTERN);
+        matcher = pattern.matcher(password);
+
+        return matcher.matches();
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,7 +78,7 @@ public class Register  extends AppCompatActivity {
         loginLink.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                startActivity(new Intent(Register.this, Login.class));
                 finish();
             }
         });
@@ -73,6 +86,7 @@ public class Register  extends AppCompatActivity {
 
 
     }
+
     public void signup() {
         Log.d(TAG, "Signup");
 
@@ -98,6 +112,7 @@ public class Register  extends AppCompatActivity {
 
 
     }
+
     public void onSignupSuccess() {
         signupButton.setEnabled(true);
         setResult(RESULT_OK, null);
@@ -132,7 +147,7 @@ public class Register  extends AppCompatActivity {
         }
 
         if (password.isEmpty() || password.length() < 6 || password.length() > 10) {
-            passwordText.setError("between 4 and 10 alphanumeric characters");
+            passwordText.setError("between 6 and 10  characters");
             valid = false;
         } else {
             passwordText.setError(null);
@@ -140,17 +155,7 @@ public class Register  extends AppCompatActivity {
 
         return valid;
     }
-    public static boolean isValidPassword(final String password) {
 
-        Pattern pattern;
-        Matcher matcher;
-        final String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[A-Z])(?=.*[@#$%^&+=!])(?=\\S+$).{4,}$";
-        pattern = Pattern.compile(PASSWORD_PATTERN);
-        matcher = pattern.matcher(password);
-
-        return matcher.matches();
-
-    }
     public String key_generator(){
         char[] chars1 = "ABCDEF012GHIJKL345MNOPQR678STUVWXYZ9".toCharArray();
         StringBuilder sb1 = new StringBuilder();
@@ -182,7 +187,10 @@ public class Register  extends AppCompatActivity {
                         Toast.makeText(Register.this,response,Toast.LENGTH_LONG).show();
 
                         if(response.equals("Successfully Registered")){
-                            startActivity(new Intent(Register.this,Login.class));
+                            Intent intent = new Intent(Register.this, Login.class);
+                            intent.putExtra("user_name", name);
+                            // intent.putExtra("emai")
+                            startActivity(intent);
                             finish();
                         }
                     }

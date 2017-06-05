@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -23,6 +22,8 @@ import android.view.MenuItem;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.Read.ReadActivity;
 import com.erickogi14gmail.study20.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,32 @@ public class Assignments extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private TabLayout tabLayout;
     private ViewPager viewPager;
+    private AdView mAdView;
+
+    @Override
+    public void onPause() {
+        if (mAdView != null) {
+            mAdView.pause();
+        }
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mAdView != null) {
+            mAdView.resume();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mAdView != null) {
+            mAdView.destroy();
+        }
+        super.onDestroy();
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,24 +65,22 @@ public class Assignments extends AppCompatActivity
         setContentView(R.layout.activity_assignments);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder()
+                // .addTestDevice("7A16224748E3A88A057B4F3AB8DF6BB1")
+                .build();
+        mAdView.loadAd(adRequest);
 
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//
-//            }
-//        });
+//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+//        drawer.setDrawerListener(toggle);
+//        toggle.syncState();
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+//        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+//        navigationView.setNavigationItemSelectedListener(this);
 
 
         viewPager = (ViewPager) findViewById(R.id.viewpager);
@@ -65,6 +90,42 @@ public class Assignments extends AppCompatActivity
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
         tabLayout.setupWithViewPager(viewPager);
         setupTabIcons();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+
+            SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
+            SearchView search = (SearchView) findViewById(R.id.search_bar);
+
+            search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
+
+            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+
+
+                @Override
+                public boolean onQueryTextSubmit(String query) {
+
+
+                    return false;
+                }
+
+                @Override
+                public boolean onQueryTextChange(String newText) {
+                    Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + viewPager.getCurrentItem());
+
+                    if (viewPager.getCurrentItem() == 1 && page != null) {
+
+                        fragment_download_assignment.filter(newText);
+
+                    } else {
+                        fragment_saved_assignments.filter(newText);
+                    }
+
+                    return false;
+                }
+            });
+
+        }
     }
 
     @Override
@@ -92,7 +153,13 @@ public class Assignments extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.action_upload_assignment) {
+
+            Intent intent = new Intent(Assignments.this, ReadActivity.class);
+            intent.putExtra(api.POST_URL, "http://erickogi.co.ke/study/api/assignmentsPost.php");
+            intent.putExtra(api.ASSIGNMENT_ID, "null");
+            intent.putExtra(api.COURSE_CODE, "null");
+            startActivity(intent);
             return true;
         }
 
@@ -118,44 +185,7 @@ public class Assignments extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
 
-            SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-
-            SearchView search = (SearchView) findViewById(R.id.search_bar);
-
-            search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
-
-            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-
-
-                @Override
-                public boolean onQueryTextSubmit(String query) {
-
-
-                    return false;
-                }
-
-                @Override
-                public boolean onQueryTextChange(String newText) {
-                    Fragment page = getSupportFragmentManager().findFragmentByTag("android:switcher:" + R.id.viewpager + ":" + viewPager.getCurrentItem());
-                    // based on the current position you can then cast the page to the correct
-                    // class and call the method:
-
-                    if (viewPager.getCurrentItem() == 0 && page != null) {
-
-                        // ((FragmentClass1)page).updateList("new item");
-                        fragment_download_assignment.filter(newText);
-
-                    } else {
-                        fragment_saved_assignments.filter(newText);
-                    }
-
-                    return false;
-                }
-            });
-
-        }
 
 
 

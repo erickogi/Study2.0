@@ -2,8 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_choose_campus"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Choose Campus"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_upload_assignment"
+        android:orderInCategory="100"
+        android:title="Upload Assignment"
         app:showAsAction="never" />
 </menu>

@@ -59,6 +59,40 @@ public class DBKeys {
     public static final String KEY_REVISION_CONTENT = "revision_content";
 
 
+    //NOTIFICATIONS
+
+    //CHANNELS
+    public static final String NOTIFICATION_CHANNELS_TABLE = "channels_table";
+    public static final String NOTIFICATION_CHANNELS_ID = "notification_c_id";
+    public static final String NOTIFICATION_CHANNELS_NAME = "notification_c_name";
+    public static final String NOTIFICATION_CHANNEL_DESC_ = "notification_c_desc";
+    public static final String NOTIFICATION_CHANNELS_COLOR = "notification_c_color";
+
+
+    //NOTICES
+    public static final String NOTIFICATION_TABLE = "notifications_table";
+    public static final String NOTIFICATION_ID_ = "notifications_id";
+    public static final String NOTIFICATION_CHANNEL_FROM = "notifications_name";
+    public static final String NOTIFICATION_TITLE_ = "notifications_title";
+    public static final String NOTIFICATION_DESCRIPTION_ = "notifications_description";
+    public static final String NOTIFICATION_DATE_ = "notification_date";
+    public static final String NOTIFICATION_READ_STATUS_ = "notification_status";
+
+
+    //TIMETABLES
+    public static final String TIMETABLES_TABLE = "timetable_table";
+    public static final String TIMETABLE_ID_ = "timetable_id";
+    public static final String TIMETABLE_TITLE = "timetable_title";
+    public static final String TIMETABLE_COURSE_ = "timetable_course_name";
+    public static final String TIMEYABLE_COURSE_YEAR = "timetable_course_year";
+    public static final String TIMETABLE_PUBLISHED_BY = "timetable_published_by";
+    public static final String TIMETABLE_PUBLISHED_ON_ = "timetable_published_on";
+    public static final String TIMETABLE_CONTENT_ = "timetable_content";
+
+
+
+
+
 
 
     public  String COURSE_ID;

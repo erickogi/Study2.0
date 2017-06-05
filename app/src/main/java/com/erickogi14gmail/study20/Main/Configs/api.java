@@ -12,14 +12,21 @@ public class api {
     public final static String ASSIGNMENT_END_POINT = "http://erickogi.co.ke/study/api/v1/?action=get_assignments&course_code=";
     public final static String EVENTS_END_POINT = "http://erickogi.co.ke/study/api/v1/?action=get_events&id=";
 
+    public final static String CHANNELS_END_POINT = "http://erickogi.co.ke/study/api/v1/?action=get_channels&notification_c_id=";
+    public final static String NOTIFICATIONS_END_POINT = "http://erickogi.co.ke/study/api/v1/?action=get_notifications&notifications_name=";
+
     public final static String REVISION_END_POINT = "http://erickogi.co.ke/study/api/v1/?action=get_revision&id=";
+    public final static String TIMETABLES_END_POINT = "http://erickogi.co.ke/study/api/v1/?action=get_timetables&timetable_id=";
 
     public final static String CONTENT_END_POINT = "http://erickogi.co.ke/study/api/v1/?action=get_content&course_code=";
+    public final static String FILES_END_POINT = "http://erickogi.co.ke/study/api/v1/?action=get_files&id=";
 //INTENTS KEYS
     public final static String COURSE_CODE = "course_code";
     public final static String ASSIGNMENT_ID = "assignment_id";
     public final static String POST_URL = "post";
     public final static String REVISION_ID = "revision_id";
+
+    public final static String APP_SHARE_LINK = "http://erickogi.co.ke/study/";
 
 
 
@@ -61,6 +68,12 @@ public class api {
 
     //We will use this to store the boolean in sharedpreference to track user is loggedin or not
     public static final String LOGGEDIN_SHARED_PREF = "loggedin";
+
+    public static final String NAME_SHARED_PREF = "user_name";
+
+    public static final String ADMINCHANNEL_SHARED_PREF = "admin_channel";
+
+
 
 
 ////////NEWS API news

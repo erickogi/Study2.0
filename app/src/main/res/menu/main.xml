@@ -1,10 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.erickogi14gmail.study20.Main.MainActivity">
+
+
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_notifications"
+        android:icon="@drawable/ic_notifications_white_24dp"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Notifications"
+        app:actionLayout="@layout/menu_action_item_badge"
+        app:showAsAction="always" />
+    <!--<item-->
+    <!--android:icon="@drawable/settings"-->
+    <!--android:id="@+id/action_settings"-->
+    <!--android:orderInCategory="100"-->
+    <!--android:title="@string/action_settings"-->
+    <!--app:showAsAction="never" />-->
+
+    <item
+        android:id="@+id/action_share"
+        android:icon="@drawable/ic_menu_share"
+        android:orderInCategory="100"
+        android:title="Share"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_contact"
+        android:icon="@drawable/ic_email_black_24dp"
+        android:orderInCategory="100"
+        android:title="Contact Developer"
         app:showAsAction="never" />
 
+    <!--<item-->
+    <!--android:id="@+id/item_samplebadge"-->
+    <!--app:actionLayout="@layout/menu_action_item_badge"-->
+    <!--app:showAsAction="always"-->
+    <!--android:title="@string/sample_1"/>-->
 </menu>

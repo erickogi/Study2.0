@@ -12,62 +12,56 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 import com.erickogi14gmail.study20.Main.Adapters.EventsAdapter;
 import com.erickogi14gmail.study20.Main.Adapters.EventsJsonParser;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.models.Events_model;
 import com.erickogi14gmail.study20.Main.utills.RecyclerTouchListener;
+import com.erickogi14gmail.study20.Main.volley.IResult;
+import com.erickogi14gmail.study20.Main.volley.VolleyService;
 import com.erickogi14gmail.study20.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 import com.muddzdev.styleabletoastlibrary.StyleableToast;
 
 import java.util.ArrayList;
 
 public class Events extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
-    static RequestQueue queue;
+
     static RecyclerView.LayoutManager mLayoutManager;
     SwipeRefreshLayout swipe_refresh_layout;
     RecyclerView recyclerView_vertical;
     EventsAdapter adapter;
     ArrayList<Events_model> tevents_models;
+    IResult mResultCallback = null;
+    VolleyService mVolleyService;
     private StaggeredGridLayoutManager mStaggeredLayoutManager;
+    private AdView mAdView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events);
+        initVolleyCallback();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-////                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-////                        .setAction("Action", null).show();
-//            }
-//        });
-
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        drawer.setDrawerListener(toggle);
-//        toggle.syncState();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder()
+                //.addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                //  .addTestDevice("7A16224748E3A88A057B4F3AB8DF6BB1")
+                .build();
+        mAdView.loadAd(adRequest);
 
         recyclerView_vertical = (RecyclerView) findViewById(R.id.recycle_view);
         swipe_refresh_layout = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
@@ -86,33 +80,7 @@ public class Events extends AppCompatActivity
             }
         });
         getRecyclerView_sources();
-//        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-//
-//          //  SearchManager manager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//
-//          //  SearchView search = (SearchView) view. findViewById(R.id.search_bar);
-//
-//           // search.setSearchableInfo(manager.getSearchableInfo(getComponentName()));
-//
-//            search.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//
-//
-//                @Override
-//                public boolean onQueryTextSubmit(String query) {
-//
-//
-//
-//                    return false;
-//                }
-//
-//                @Override
-//                public boolean onQueryTextChange(String newText) {
-//                    filter(newText);
-//                    return false;
-//                }
-//            });
-//
-//        }
+
 
 
         recyclerView_vertical.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), recyclerView_vertical, new RecyclerTouchListener.ClickListener() {
@@ -155,23 +123,6 @@ public class Events extends AppCompatActivity
         requestDataSources(api.EVENTS_END_POINT);
     }
 
-//    void filter(String text) {
-//        ArrayList<Events_model> temp = new ArrayList();
-//        for (Course_model d : course_model) {
-//            //or use .contains(text)
-//            if (d.getCOURSE_ID().toLowerCase().contains(text.toLowerCase())
-//                    || d.getCOURSE_TITLE().toLowerCase().contains(text.toLowerCase())) {
-//                temp.add(d);
-//            }
-//
-//        }
-//        try {
-//            adapter.updateList(temp);
-//        } catch (Exception nm) {
-//            nm.printStackTrace();
-//        }
-//
-//    }
 
     public void setRecyclerView_courses(ArrayList<Events_model> events_models) {
 
@@ -184,17 +135,10 @@ public class Events extends AppCompatActivity
 
         mLayoutManager = new LinearLayoutManager(getApplicationContext());
 
-        //      if (this.isListView) {
-//
         mStaggeredLayoutManager = new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL);
 
 
-//        } else {
-//
-//            mStaggeredLayoutManager = new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
-//
-//
-//        }
+
 
 
         recyclerView_vertical.setLayoutManager(mStaggeredLayoutManager);
@@ -268,49 +212,41 @@ public class Events extends AppCompatActivity
         return true;
     }
 
+    void initVolleyCallback() {
+        mResultCallback = new IResult() {
+            @Override
+            public void notifySuccess(String requestType, String response) {
+                ArrayList<Events_model> events_modelsArrayList = new ArrayList<>();
+
+
+                if (requestType.equals("GETCALL_EVENTS")) {
+                    events_modelsArrayList = EventsJsonParser.parseData(response);
+
+                    setRecyclerView_courses(events_modelsArrayList);
+                }
+
+
+            }
+
+            @Override
+            public void notifyError(String requestType, VolleyError error) {
+                try {
+                    toast("Network Error");
+                    swipe_refresh_layout.setRefreshing(false);
+                } catch (Exception cont) {
+                    cont.printStackTrace();
+                }
+
+            }
+        };
+    }
+
+
     public void requestDataSources(String uri) {
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, uri,
-
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        ArrayList<Events_model> events_modelsArrayList = new ArrayList<>();
-
-                        if (response != null || !response.isEmpty()) {
-                            try {
-                                if (!events_modelsArrayList.isEmpty()) {
-                                    events_modelsArrayList.clear();
-                                }
-                                events_modelsArrayList.clear();
-                            } catch (Exception m) {
-                                m.printStackTrace();
-                            }
-                            Log.d("klm", "" + response);
-                            events_modelsArrayList = EventsJsonParser.parseData(response);
-
-                            setRecyclerView_courses(events_modelsArrayList);
-
-                        } else {
-                            swipe_refresh_layout.setRefreshing(false);
-                        }
-
-                    }
-                },
-
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        toast("Network Error");
-                        swipe_refresh_layout.setRefreshing(false);
-                        // progressDialog.dismiss();
+        mVolleyService = new VolleyService(mResultCallback, getApplicationContext());
+        mVolleyService.getDataVolley("GETCALL_EVENTS", uri);
 
 
-                    }
-                });
-        queue = Volley.newRequestQueue(getApplicationContext());
-        queue.add(stringRequest);
-        //context = getContext();
     }
 
     private void toast(String msg) {

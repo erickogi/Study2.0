@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
@@ -22,6 +23,8 @@ import com.erickogi14gmail.study20.Main.models.Chapters;
 import com.erickogi14gmail.study20.Main.models.Revision_model;
 import com.erickogi14gmail.study20.Main.utills.TouchyWebView;
 import com.erickogi14gmail.study20.R;
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
 
 import java.util.ArrayList;
 
@@ -38,8 +41,9 @@ public class ReadActivity extends AppCompatActivity
     private String html;
     private String url;
     private String rvId;
-    private  int nav_id;
+    private int nav_id = 0;
     private  String nav_items[];
+    private AdView mAdView;
 
     protected void setNavigationItems(String[] items) {
         nav_items=items;
@@ -54,7 +58,29 @@ public class ReadActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void onPause() {
+        if (mAdView != null) {
+            mAdView.pause();
+        }
+        super.onPause();
+    }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (mAdView != null) {
+            mAdView.resume();
+        }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mAdView != null) {
+            mAdView.destroy();
+        }
+        super.onDestroy();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +89,12 @@ public class ReadActivity extends AppCompatActivity
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        mAdView = (AdView) findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder()
+                // .addTestDevice("7A16224748E3A88A057B4F3AB8DF6BB1")
+                .build();
+        mAdView.loadAd(adRequest);
+
 
          fab= (FloatingActionButton) findViewById(R.id.fab_next);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -100,7 +132,7 @@ public class ReadActivity extends AppCompatActivity
 
         navigationView.setNavigationItemSelectedListener(this);
 
-
+        try {
         Intent intent = getIntent();
         code = intent.getStringExtra(api.COURSE_CODE);
         assId = intent.getStringExtra(api.ASSIGNMENT_ID);
@@ -112,7 +144,6 @@ public class ReadActivity extends AppCompatActivity
             ArrayList<String> list = new ArrayList<>();
             ArrayList<Chapters> chapters = dbOperations.getChaptersByCourse(code);
             for (int count = 0; count < chapters.size(); count++) {
-
                 list.add(chapters.get(count).getChapter_title());
 
             }
@@ -172,7 +203,9 @@ public class ReadActivity extends AppCompatActivity
         }
 
 
-
+        } catch (Exception m) {
+            Toast.makeText(this, "Experiencing some Errors :Error 2100-RA", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -233,6 +266,7 @@ private void setWebView(String html){
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         String topicName = item.getTitle().toString();
+
         nav_id=item.getItemId();
         getSupportActionBar().setTitle(topicName);
 

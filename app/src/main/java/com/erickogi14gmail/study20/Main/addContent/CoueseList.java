@@ -1,6 +1,7 @@
 package com.erickogi14gmail.study20.Main.addContent;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -16,7 +17,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.erickogi14gmail.study20.Main.Adapters.MainRecyclerViewAdapter;
+import com.erickogi14gmail.study20.Main.Adapters.AddRecyclerViewAdapter;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
 import com.erickogi14gmail.study20.Main.Read.ReadActivity;
@@ -37,27 +38,81 @@ public class CoueseList extends Fragment {
     static View view;
     static RecyclerView.LayoutManager mLayoutManager;
     static ArrayList<Course_model> data_model;
-    private static MainRecyclerViewAdapter adapter;
+    static ArrayList<Course_model> temp;
+    static RecyclerView lv;
+    static SwipeRefreshLayout swipe_refresh_layout;
+    private static AddRecyclerViewAdapter adapter;
     Cursor cursor;
     DBOperations dbOperations = new DBOperations(getContext());
-    RecyclerView lv;
-    SwipeRefreshLayout swipe_refresh_layout;
 
     static void filter(String text) {
-        ArrayList<Course_model> temp = new ArrayList();
-        for (Course_model d : data_model) {
-            //or use .contains(text)
-            if (d.getCOURSE_ID().toLowerCase().contains(text.toLowerCase()) || d.getCOURSE_TITLE().toLowerCase().contains(text.toLowerCase())) {
-                temp.add(d);
-            }
-
-        }
         try {
-            adapter.updateList(temp);
+            ArrayList<Course_model> tempm = new ArrayList();
+            for (Course_model d : data_model) {
+                //or use .contains(text)
+                if (d.getCOURSE_ID().toLowerCase().contains(text.toLowerCase()) || d.getCOURSE_TITLE().toLowerCase().contains(text.toLowerCase())) {
+                    tempm.add(d);
+                }
+
+            }
+            temp = tempm;
+
+            adapter.updateList(tempm);
         } catch (Exception nm) {
             nm.printStackTrace();
         }
 
+    }
+
+    static void setRecyclerView(Context context) {
+//
+        try {
+            DBOperations dbOperations = new DBOperations(context);
+            data_model = dbOperations.getCourseList();
+            temp = data_model;
+            try {
+                if (data_model.isEmpty() || data_model.equals(null)) {
+                    swipe_refresh_layout.setRefreshing(false);
+                    StyleableToast st = new StyleableToast(context, "You Have No Saved Courses. Click the Add Button Below", Toast.LENGTH_SHORT);
+                    st.setBackgroundColor(Color.parseColor("#ff9040"));
+                    st.setTextColor(Color.WHITE);
+                    st.setIcon(R.drawable.ic_error_outline_white_24dp);
+
+                    st.setMaxAlpha();
+                    st.show();
+                    swipe_refresh_layout.setRefreshing(false);
+
+                } else {
+
+
+                    adapter = new AddRecyclerViewAdapter(context, data_model, 1);
+                    adapter.notifyDataSetChanged();
+
+
+                    mLayoutManager = new LinearLayoutManager(context);
+                    lv.setLayoutManager(mLayoutManager);
+                    lv.setItemAnimator(new DefaultItemAnimator());
+
+
+                    lv.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                    swipe_refresh_layout.setRefreshing(false);
+                }
+            } catch (Exception a) {
+                a.printStackTrace();
+                swipe_refresh_layout.setRefreshing(false);
+                StyleableToast st = new StyleableToast(context, "You Have No Saved Courses. Click the Add Button Below", Toast.LENGTH_SHORT);
+                st.setBackgroundColor(Color.parseColor("#ff9040"));
+                st.setTextColor(Color.WHITE);
+                st.setIcon(R.drawable.ic_error_outline_white_24dp);
+
+                st.setMaxAlpha();
+                st.show();
+                swipe_refresh_layout.setRefreshing(false);
+            }
+        } catch (Exception m) {
+            Toast.makeText(context, "Experiencing some Errors :Error 2300-ACS", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override
@@ -82,26 +137,20 @@ public class CoueseList extends Fragment {
             @Override
             public void onRefresh() {
                 swipe_refresh_layout.setRefreshing(true);
-                setRecyclerView();
+                setRecyclerView(getActivity());
 
             }
         });
 
 
-//        final FloatingActionButton fab = (FloatingActionButton)view. findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                startActivity(new Intent(getActivity(), AddCourse.class));
-//            }
-//        });
-        setRecyclerView();
+        setRecyclerView(getActivity());
+
         lv.addOnItemTouchListener(new RecyclerTouchListener(getContext(), lv, new RecyclerTouchListener.ClickListener() {
 
             @Override
             public void onClick(View view, int position) {
                 Intent intent = new Intent(getActivity(), ReadActivity.class);
-                intent.putExtra(api.COURSE_CODE, data_model.get(position).getCOURSE_ID());
+                intent.putExtra(api.COURSE_CODE, temp.get(position).getCOURSE_ID());
                 intent.putExtra(api.ASSIGNMENT_ID, "null");
                 intent.putExtra(api.REVISION_ID, "null");
                 intent.putExtra(api.POST_URL, "null");
@@ -124,15 +173,16 @@ public class CoueseList extends Fragment {
                     public void onClick(View v) {
                         DBOperations dbOperations = new DBOperations(getContext());
 
-                        if (dbOperations.deleteContent(data_model.get(position).getCOURSE_ID())) {
-                            dbOperations.deleteCourse(data_model.get(position).getCOURSE_ID());
+                        if (dbOperations.deleteContent(temp.get(position).getCOURSE_ID())) {
+                            dbOperations.deleteCourse(temp.get(position).getCOURSE_ID());
                         }
 
                         dialog.dismiss();
                         data_model.remove(position);
-                        // notifyDataSetChanged();
+
                         adapter.notifyDataSetChanged();
-                        setRecyclerView();
+                        setRecyclerView(getActivity());
+                        fragment_add_course.getRecyclerView_sources(getActivity());
                     }
                 });
                 button_keep.setOnClickListener(new View.OnClickListener() {
@@ -162,51 +212,5 @@ public class CoueseList extends Fragment {
             }
         });
         return view;
-    }
-
-    void setRecyclerView() {
-//
-        DBOperations dbOperations = new DBOperations(getContext());
-        data_model = dbOperations.getCourseList();
-        try {
-            if (data_model.isEmpty() || data_model.equals(null)) {
-                swipe_refresh_layout.setRefreshing(false);
-                StyleableToast st = new StyleableToast(getContext(), "You Have No Saved Courses. Click the Add Button Below", Toast.LENGTH_SHORT);
-                st.setBackgroundColor(Color.parseColor("#ff9040"));
-                st.setTextColor(Color.WHITE);
-                st.setIcon(R.drawable.ic_error_outline_white_24dp);
-
-                st.setMaxAlpha();
-                st.show();
-                swipe_refresh_layout.setRefreshing(false);
-
-            } else {
-
-
-                adapter = new MainRecyclerViewAdapter(getContext(), data_model);
-                adapter.notifyDataSetChanged();
-
-
-                mLayoutManager = new LinearLayoutManager(getContext());
-                lv.setLayoutManager(mLayoutManager);
-                lv.setItemAnimator(new DefaultItemAnimator());
-
-
-                lv.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
-                swipe_refresh_layout.setRefreshing(false);
-            }
-        } catch (Exception a) {
-            a.printStackTrace();
-            swipe_refresh_layout.setRefreshing(false);
-            StyleableToast st = new StyleableToast(getContext(), "You Have No Saved Courses. Click the Add Button Below", Toast.LENGTH_SHORT);
-            st.setBackgroundColor(Color.parseColor("#ff9040"));
-            st.setTextColor(Color.WHITE);
-            st.setIcon(R.drawable.ic_error_outline_white_24dp);
-
-            st.setMaxAlpha();
-            st.show();
-            swipe_refresh_layout.setRefreshing(false);
-        }
     }
 }

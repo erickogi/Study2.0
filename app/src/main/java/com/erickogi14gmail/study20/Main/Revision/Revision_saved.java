@@ -1,26 +1,21 @@
 package com.erickogi14gmail.study20.Main.Revision;
 
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.android.volley.RequestQueue;
 import com.erickogi14gmail.study20.Main.Adapters.RevisionAdapter;
 import com.erickogi14gmail.study20.Main.Configs.api;
 import com.erickogi14gmail.study20.Main.DB.DBOperations;
@@ -41,25 +36,81 @@ public class Revision_saved extends Fragment {
 
     static View view;
 
-    // ArrayList<Assignment_content_model> data_model;
-    static RequestQueue queue;
-    static Context context;
+
     static RecyclerView.LayoutManager mLayoutManager;
     static ArrayList<Revision_model> revision_model;
-    // static ArrayList<Revision_model> course_model;
-    RevisionAdapter mainRecyclerViewAdapter;
-    RevisionAdapter revisionAdapter;
-    ArrayList<Revision_model> displayedList;
-    RevisionAdapter adapter;
-    DBOperations dbOperations;
-    SwipeRefreshLayout swipe_refresh_layout;
-    RecyclerView lv;
-    ProgressDialog progressDialog;
-    private Toolbar mToolbar;
-    private int progressBarStatus;
-    private Handler progressBarHandler = new Handler();
+    static ArrayList<Revision_model> temp_model;
 
-    private StaggeredGridLayoutManager mStaggeredLayoutManager;
+    static RevisionAdapter adapter;
+
+    static SwipeRefreshLayout swipe_refresh_layout;
+    static RecyclerView lv;
+
+    static void filter(String text) {
+        try {
+            ArrayList<Revision_model> temp = new ArrayList();
+            for (Revision_model d : revision_model) {
+
+                if (d.getRevision_course_code().toLowerCase().contains(text.toLowerCase())
+                        || d.getRevision_course_name().toLowerCase().contains(text.toLowerCase())) {
+                    temp.add(d);
+                }
+
+            }
+            temp_model = temp;
+            adapter.updateList(temp);
+        } catch (Exception nm) {
+            nm.printStackTrace();
+        }
+
+    }
+
+    static void setRecyclerView(Context context) {
+//
+        DBOperations dbOperations = new DBOperations(context);
+        revision_model = dbOperations.getRevisionList();
+        temp_model = revision_model;
+        try {
+            if (revision_model.isEmpty() || revision_model.equals(null)) {
+                swipe_refresh_layout.setRefreshing(false);
+                StyleableToast st = new StyleableToast(context, "You Have No Saved Courses. Click the Add Button Below", Toast.LENGTH_SHORT);
+                st.setBackgroundColor(Color.parseColor("#ff9040"));
+                st.setTextColor(Color.WHITE);
+                st.setIcon(R.drawable.ic_error_outline_white_24dp);
+
+                st.setMaxAlpha();
+                st.show();
+                swipe_refresh_layout.setRefreshing(false);
+
+            } else {
+
+
+                adapter = new RevisionAdapter(context, revision_model, 1);
+                adapter.notifyDataSetChanged();
+
+
+                mLayoutManager = new LinearLayoutManager(context);
+                lv.setLayoutManager(mLayoutManager);
+                lv.setItemAnimator(new DefaultItemAnimator());
+
+
+                lv.setAdapter(adapter);
+                adapter.notifyDataSetChanged();
+                swipe_refresh_layout.setRefreshing(false);
+            }
+        } catch (Exception a) {
+            a.printStackTrace();
+            swipe_refresh_layout.setRefreshing(false);
+            StyleableToast st = new StyleableToast(context, "You Have No Saved Revision Items. Click the Add Button Below", Toast.LENGTH_SHORT);
+            st.setBackgroundColor(Color.parseColor("#ff9040"));
+            st.setTextColor(Color.WHITE);
+            st.setIcon(R.drawable.ic_error_outline_white_24dp);
+
+            st.setMaxAlpha();
+            st.show();
+            swipe_refresh_layout.setRefreshing(false);
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater,
@@ -83,31 +134,24 @@ public class Revision_saved extends Fragment {
             @Override
             public void onRefresh() {
                 swipe_refresh_layout.setRefreshing(true);
-                setRecyclerView();
+                setRecyclerView(getActivity());
 
             }
         });
 
 
-//        final FloatingActionButton fab = (FloatingActionButton)view. findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                startActivity(new Intent(getActivity(), AddCourse.class));
-//            }
-//        });
-        setRecyclerView();
+        setRecyclerView(getActivity());
         lv.addOnItemTouchListener(new RecyclerTouchListener(getContext(), lv, new RecyclerTouchListener.ClickListener() {
 
             @Override
             public void onClick(View view, int position) {
                 Intent intent = new Intent(getActivity(), ReadActivity.class);
-                intent.putExtra(api.REVISION_ID, String.valueOf(revision_model.get(position).getId()));
+                intent.putExtra(api.REVISION_ID, String.valueOf(temp_model.get(position).getId()));
                 intent.putExtra(api.ASSIGNMENT_ID, "null");
                 intent.putExtra(api.POST_URL, "null");
 
                 intent.putExtra(api.COURSE_CODE, "null");
-                //  Log.d("kk",data_model.get(position).getASSIGNMENT_ID())
+
                 startActivity(intent);
 
             }
@@ -126,15 +170,17 @@ public class Revision_saved extends Fragment {
                     public void onClick(View v) {
                         DBOperations dbOperations = new DBOperations(getContext());
 
-                        if (dbOperations.deleteRevision(String.valueOf(revision_model.get(position).getId()))) {
-                            // dbOperations.deleteCourse(data_model.get(position).getCOURSE_ID());
+                        if (dbOperations.deleteRevision(String.valueOf(temp_model.get(position).getId()))) {
+
                         }
 
                         dialog.dismiss();
                         revision_model.remove(position);
-                        // notifyDataSetChanged();
+
                         adapter.notifyDataSetChanged();
-                        setRecyclerView();
+
+                        setRecyclerView(getActivity());
+                        Revision_download.getRecyclerView_sources(getActivity());
                     }
                 });
                 button_keep.setOnClickListener(new View.OnClickListener() {
@@ -164,53 +210,6 @@ public class Revision_saved extends Fragment {
             }
         });
         return view;
-    }
-
-
-    void setRecyclerView() {
-//
-        DBOperations dbOperations = new DBOperations(getContext());
-        revision_model = dbOperations.getRevisionList();
-        try {
-            if (revision_model.isEmpty() || revision_model.equals(null)) {
-                swipe_refresh_layout.setRefreshing(false);
-                StyleableToast st = new StyleableToast(getContext(), "You Have No Saved Courses. Click the Add Button Below", Toast.LENGTH_SHORT);
-                st.setBackgroundColor(Color.parseColor("#ff9040"));
-                st.setTextColor(Color.WHITE);
-                st.setIcon(R.drawable.ic_error_outline_white_24dp);
-
-                st.setMaxAlpha();
-                st.show();
-                swipe_refresh_layout.setRefreshing(false);
-
-            } else {
-
-
-                adapter = new RevisionAdapter(getContext(), revision_model, 1);
-                adapter.notifyDataSetChanged();
-
-
-                mLayoutManager = new LinearLayoutManager(getContext());
-                lv.setLayoutManager(mLayoutManager);
-                lv.setItemAnimator(new DefaultItemAnimator());
-
-
-                lv.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
-                swipe_refresh_layout.setRefreshing(false);
-            }
-        } catch (Exception a) {
-            a.printStackTrace();
-            swipe_refresh_layout.setRefreshing(false);
-            StyleableToast st = new StyleableToast(getContext(), "You Have No Saved Revision Items. Click the Add Button Below", Toast.LENGTH_SHORT);
-            st.setBackgroundColor(Color.parseColor("#ff9040"));
-            st.setTextColor(Color.WHITE);
-            st.setIcon(R.drawable.ic_error_outline_white_24dp);
-
-            st.setMaxAlpha();
-            st.show();
-            swipe_refresh_layout.setRefreshing(false);
-        }
     }
 }
 
